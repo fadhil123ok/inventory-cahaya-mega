@@ -1,0 +1,3229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CAHAYA MEGA — The Paint Specialist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg-outer: #ddd8cf;
+      --bg-canvas-top: #f4f1eb;
+      --bg-canvas-bot: #e6e0d5;
+      --glass-light: rgba(255, 255, 255, 0.78);
+      --glass-strong: rgba(255, 255, 255, 0.92);
+      --glass-border: rgba(255, 255, 255, 0.72);
+      --charcoal: #1f1d1a;
+      --charcoal-soft: #2c2925;
+      --charcoal-glass: rgba(31, 29, 26, 0.90);
+      --text-main: #1f1d1a;
+      --text-muted: #6e6960;
+      --text-subtle: #968f83;
+      --gold-dark: #8a6526;
+      --gold-mid: #b88e44;
+      --gold-soft: rgba(184, 142, 68, 0.14);
+      --success: #1b6b4b;
+      --success-bg: rgba(27, 107, 75, 0.10);
+      --danger: #a83232;
+      --danger-bg: rgba(168, 50, 50, 0.10);
+      --line-soft: rgba(31, 29, 26, 0.08);
+      --shadow-shell: 0 28px 70px rgba(24, 22, 18, 0.14);
+      --shadow-card: 0 10px 28px rgba(24, 22, 18, 0.06);
+      --radius-shell: 28px;
+      --radius-card: 24px;
+      --radius-pill: 9999px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255, 249, 238, 0.92) 0%, transparent 45%),
+        radial-gradient(circle at 88% 18%, rgba(214, 203, 184, 0.65) 0%, transparent 48%),
+        radial-gradient(circle at 50% 92%, rgba(196, 188, 174, 0.6) 0%, transparent 55%),
+        linear-gradient(155deg, #ebe6dd 0%, #dcd6cb 100%);
+      min-height: 100vh;
+      padding: 18px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ LAYAR LOGIN TERPROTEKSI SERVER-SIDE ============ */
+    #loginScreen {
+      min-height: calc(100vh - 36px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--glass-strong);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px 34px 34px;
+      box-shadow: var(--shadow-shell);
+      text-align: center;
+      transition: transform 0.35s var(--ease);
+    }
+
+    /* Logo polosan transparan 100% menyatu dengan tema web (tanpa kotak biru dongker) */
+    .brand-logo-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      background: transparent;
+      user-select: none;
+    }
+
+    .brand-logo-emblem {
+      width: 118px;
+      height: auto;
+      display: block;
+    }
+
+    .brand-logo-line {
+      width: 188px;
+      height: 1.5px;
+      margin: 8px 0 10px;
+      background: linear-gradient(90deg, transparent, #8a6526 22%, #c9a252 50%, #8a6526 78%, transparent);
+    }
+
+    .brand-logo-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--charcoal);
+      line-height: 1.1;
+    }
+
+    .brand-logo-sub {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      color: var(--gold-dark);
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .login-desc {
+      margin: 22px 0 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .field-group {
+      text-align: left;
+      margin-bottom: 14px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-ctrl, .select-ctrl, .textarea-ctrl {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(31, 29, 26, 0.14);
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+    }
+
+    .input-ctrl:focus, .select-ctrl:focus, .textarea-ctrl:focus {
+      border-color: var(--charcoal);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(31, 29, 26, 0.08);
+    }
+
+    .btn-primary-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 10px 10px 22px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: var(--charcoal);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.25s var(--ease), background 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .btn-primary-pill:hover {
+      background: #0f0e0c;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(31, 29, 26, 0.22);
+    }
+
+    .btn-primary-pill:active { transform: translateY(0); }
+
+    .btn-primary-pill .arrow-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--charcoal);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform 0.25s var(--ease);
+    }
+
+    .btn-primary-pill:hover .arrow-badge { transform: translateX(2px); }
+
+    .btn-ghost-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(31, 29, 26, 0.16);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+
+    .btn-ghost-pill:hover {
+      background: #ffffff;
+      border-color: var(--charcoal);
+      transform: translateY(-1px);
+    }
+
+    .btn-sm-edit {
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(31, 29, 26, 0.15);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--charcoal);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+    }
+
+    .btn-sm-edit:hover {
+      background: var(--charcoal);
+      color: #ffffff;
+      border-color: var(--charcoal);
+    }
+
+    .login-security-note {
+      margin-top: 18px;
+      font-size: 11.5px;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* ============ KANVAS UTAMA APLIKASI (EDITORIAL MINIMALISM) ============ */
+    #appShell {
+      display: none;
+      max-width: 1440px;
+      margin: 0 auto;
+      min-height: calc(100vh - 36px);
+      background:
+        radial-gradient(circle at 82% 8%, rgba(255, 252, 245, 0.95) 0%, transparent 45%),
+        linear-gradient(165deg, var(--bg-canvas-top) 0%, var(--bg-canvas-bot) 100%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-shell);
+      box-shadow: var(--shadow-shell);
+      padding: 20px 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Navigation Bar */
+    .top-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .nav-brand-compact {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .nav-brand-compact svg {
+      width: 44px;
+      height: auto;
+      flex-shrink: 0;
+    }
+
+    .nav-brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .nav-brand-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--charcoal);
+    }
+
+    .nav-brand-tag {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      color: var(--gold-dark);
+      margin-top: 3px;
+    }
+
+    .pill-nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+      overflow-x: auto;
+      max-width: 100%;
+      scrollbar-width: none;
+    }
+
+    .pill-nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-pill-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+
+    .nav-pill-btn:hover {
+      color: var(--charcoal);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .nav-pill-btn.active {
+      background: var(--charcoal);
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(31, 29, 26, 0.18);
+    }
+
+    .nav-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-circle-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--charcoal);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+
+    .icon-circle-btn:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* Workspace Grid: Floating Left Vertical Dock + Content Area */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .left-dock {
+      position: sticky;
+      top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 7px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-card);
+    }
+
+    .dock-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+
+    .dock-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--charcoal);
+    }
+
+    .dock-btn.active {
+      background: var(--charcoal);
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(31, 29, 26, 0.2);
+    }
+
+    .dock-divider {
+      width: 24px;
+      height: 1px;
+      background: var(--line-soft);
+      margin: 4px 0;
+    }
+
+    /* Editorial Page Header */
+    .page-kicker {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .page-title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-size: clamp(26px, 3vw, 38px);
+      font-weight: 400;
+      letter-spacing: -0.025em;
+      color: var(--charcoal);
+      line-height: 1.1;
+    }
+
+    .page-sub {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Bento Summary Grid */
+    .bento-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(230px, 1.1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .bento-card {
+      background: var(--glass-light);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.25s var(--ease);
+    }
+
+    .bento-card:hover { transform: translateY(-2px); }
+
+    .bento-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .bento-val {
+      font-size: clamp(20px, 2.2vw, 27px);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bento-foot {
+      font-size: 12px;
+      color: var(--text-subtle);
+      margin-top: 6px;
+    }
+
+    .bento-card-dark {
+      background: var(--charcoal-glass);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 16px 34px rgba(24, 22, 18, 0.18);
+      transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+    }
+
+    .bento-card-dark:hover {
+      transform: translateY(-2px);
+      background: #141210;
+    }
+
+    .bento-dark-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .bento-dark-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--charcoal);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* Glass Surface Panels */
+    .glass-panel {
+      background: var(--glass-light);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 18px;
+    }
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-search {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      background: rgba(31, 29, 26, 0.04);
+      border-bottom: 1px solid var(--line-soft);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 12px 14px;
+      font-size: 13.5px;
+      border-bottom: 1px solid var(--line-soft);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.2s var(--ease); }
+    tbody tr:hover { background: rgba(255, 255, 255, 0.85); }
+
+    .num-col {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-ok { background: var(--success-bg); color: var(--success); }
+    .badge-low { background: var(--danger-bg); color: var(--danger); }
+    .badge-neutral { background: rgba(31, 29, 26, 0.08); color: var(--charcoal); }
+    .badge-gold { background: var(--gold-soft); color: var(--gold-dark); }
+
+    /* Rak I-XI & Lantai 1-7 Selector */
+    .rack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .rack-tile {
+      padding: 12px 10px;
+      border-radius: 18px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.72);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+
+    .rack-tile:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .rack-tile.active {
+      background: var(--charcoal);
+      color: #ffffff;
+      border-color: var(--charcoal);
+      box-shadow: 0 10px 20px rgba(31, 29, 26, 0.18);
+    }
+
+    .rack-tile-num { font-size: 16px; font-weight: 700; }
+    .rack-tile-meta { font-size: 11px; opacity: 0.75; margin-top: 3px; }
+
+    .floor-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .floor-pill {
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(31, 29, 26, 0.14);
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--charcoal);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+    }
+
+    .floor-pill.active {
+      background: var(--charcoal);
+      color: #ffffff;
+      border-color: var(--charcoal);
+    }
+
+    /* Katalog Grid */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+    }
+
+    .catalog-card {
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .catalog-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 34px rgba(24, 22, 18, 0.10);
+    }
+
+    .catalog-media-box {
+      height: 184px;
+      background: linear-gradient(135deg, #e7e1d7, #d7cfc2);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .catalog-media-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .catalog-media-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(31, 29, 26, 0.82);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .catalog-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .catalog-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--charcoal);
+    }
+
+    .catalog-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold-dark);
+      margin: 8px 0 10px;
+    }
+
+    .catalog-specs-mini {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+      flex: 1;
+    }
+
+    .catalog-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+    }
+
+    /* Scanner Box */
+    .scanner-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    #cameraReader {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #1a1815;
+      min-height: 60px;
+      display: none;
+      margin-top: 12px;
+    }
+
+    /* Kalkulator Layout */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 18px;
+    }
+
+    .calc-result-box {
+      background: var(--charcoal);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 14px;
+    }
+
+    .calc-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 5px 0;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .calc-line.total {
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      margin-top: 8px;
+      padding-top: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Tab Visibility */
+    .tab-section { display: none; animation: fadeIn 0.28s var(--ease); }
+    .tab-section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Custom Modal & Toast (Tanpa alert/confirm bawaan browser) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 18, 15, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 900;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #f8f6f2;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .modal-title { font-size: 18px; font-weight: 700; }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    #toastBox {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-item {
+      background: var(--charcoal);
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      border-left: 4px solid #c9a252;
+      max-width: 340px;
+      animation: fadeIn 0.25s var(--ease);
+    }
+
+    .toast-item.err { border-left-color: #e05252; }
+    .toast-item.ok { border-left-color: #3db382; }
+
+    .load-more-wrap {
+      text-align: center;
+      padding-top: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+
+    .media-preview-box {
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line-soft);
+      background: #ece8e0;
+      max-height: 220px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .media-preview-box img, .media-preview-box video {
+      max-width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+    }
+
+    @media (max-width: 1024px) {
+      .bento-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scanner-grid, .calc-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 8px 8px 82px; }
+      #appShell { padding: 14px; border-radius: 22px; }
+      .workspace-grid { grid-template-columns: 1fr; }
+      .left-dock {
+        position: fixed;
+        top: auto;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        flex-direction: row;
+        justify-content: space-around;
+        z-index: 500;
+        padding: 8px 10px;
+      }
+      .dock-divider { display: none; }
+      .bento-summary { grid-template-columns: 1fr; }
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+      .nav-right-actions .btn-primary-pill span.cta-label { display: none; }
+      .btn-primary-pill { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HALAMAN LOGIN SERVER-SIDE ================= -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <!-- Logo SVG Polosan Transparan Mengikuti Tema Web (Sub-teks: THE PAINT SPECIALIST) -->
+      <div class="brand-logo-wrap">
+        <svg class="brand-logo-emblem" viewBox="0 0 260 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Cahaya Mega">
+          <defs>
+            <linearGradient id="cmGoldMain" x1="20" y1="10" x2="240" y2="125" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#d2ac63"/>
+              <stop offset="35%" stop-color="#9e7632"/>
+              <stop offset="68%" stop-color="#c9a252"/>
+              <stop offset="100%" stop-color="#7c5920"/>
+            </linearGradient>
+          </defs>
+          <!-- Emblem setengah lingkaran mata gergaji -->
+          <path d="M26 120 L18 96 L35 97 L31 73 L48 76 L50 51 L67 57 L74 33 L91 42 L103 20 L118 33 L134 15 L146 32 L166 20 L173 41 L195 34 L197 56 L220 54 L215 76 L237 80 L226 101 L244 111 L232 120 L214 120 A84 84 0 0 0 46 120 Z" fill="url(#cmGoldMain)"/>
+          <!-- Lengkungan ganda bagian dalam -->
+          <path d="M56 120 A74 74 0 0 1 204 120" stroke="url(#cmGoldMain)" stroke-width="5.5" stroke-linecap="round"/>
+          <path d="M68 120 A62 62 0 0 1 192 120" stroke="url(#cmGoldMain)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Siluet alat serut kayu di tengah -->
+          <path d="M84 118 L178 118 C181 118 182 114 179 111 L167 104 C169 98 172 91 169 86 C166 82 159 83 157 88 C155 92 158 97 156 101 C148 103 139 95 129 94 L111 72 L106 75 L122 96 L116 100 L108 87 C106 80 100 76 92 77 C97 82 99 90 95 97 C91 104 84 109 84 118 Z M105 111 C108 103 113 102 119 106 L124 111 Z" fill="url(#cmGoldMain)"/>
+          <path d="M123 78 L137 95 L133 98 L119 81 Z" fill="url(#cmGoldMain)"/>
+        </svg>
+        <div class="brand-logo-line"></div>
+        <div class="brand-logo-title">CAHAYA MEGA</div>
+        <div class="brand-logo-sub">THE PAINT SPECIALIST</div>
+      </div>
+
+      <p class="login-desc">Sistem Inventaris, Barcode, Katalog &amp; Keuangan Terproteksi Server-Side Session Token.</p>
+
+      <form id="loginForm" onsubmit="event.preventDefault(); handleLoginSubmit();">
+        <div class="field-group">
+          <label class="field-label" for="loginPhone">Nomor HP Terdaftar</label>
+          <input id="loginPhone" class="input-ctrl" type="tel" placeholder="087891948192 / 081270786968" autocomplete="username" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="loginPin">PIN Akses</label>
+          <input id="loginPin" class="input-ctrl" type="password" placeholder="Masukkan PIN (default: 123456)" autocomplete="current-password" required>
+        </div>
+        <button id="btnLoginSubmit" type="submit" class="btn-primary-pill" style="width:100%; margin-top:8px;">
+          <span>Masuk Sistem</span>
+          <span class="arrow-badge">&#8594;</span>
+        </button>
+      </form>
+
+      <div class="login-security-note">
+        <span>&#128274;</span>
+        <span>Validasi Token CacheService Aktif &bull; Anti Client-Side Bypass</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SHELL APLIKASI UTAMA ================= -->
+  <div id="appShell">
+    <!-- Top Navigation Bar -->
+    <header class="top-navbar">
+      <div class="nav-brand-compact" onclick="switchTab('stok')">
+        <svg viewBox="0 0 260 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cmGoldTop" x1="20" y1="10" x2="240" y2="125" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#c9a252"/>
+              <stop offset="50%" stop-color="#9b722f"/>
+              <stop offset="100%" stop-color="#7c5920"/>
+            </linearGradient>
+          </defs>
+          <path d="M26 120 L18 96 L35 97 L31 73 L48 76 L50 51 L67 57 L74 33 L91 42 L103 20 L118 33 L134 15 L146 32 L166 20 L173 41 L195 34 L197 56 L220 54 L215 76 L237 80 L226 101 L244 111 L232 120 L214 120 A84 84 0 0 0 46 120 Z" fill="url(#cmGoldTop)"/>
+          <path d="M56 120 A74 74 0 0 1 204 120" stroke="url(#cmGoldTop)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M84 118 L178 118 C181 118 182 114 179 111 L167 104 C169 98 172 91 169 86 C166 82 159 83 157 88 C155 92 158 97 156 101 C148 103 139 95 129 94 L111 72 L106 75 L122 96 L116 100 L108 87 C106 80 100 76 92 77 C97 82 99 90 95 97 C91 104 84 109 84 118 Z" fill="url(#cmGoldTop)"/>
+        </svg>
+        <div class="nav-brand-text">
+          <span class="nav-brand-name">CAHAYA MEGA</span>
+          <span class="nav-brand-tag">THE PAINT SPECIALIST</span>
+        </div>
+      </div>
+
+      <nav class="pill-nav-bar" id="topTabNav">
+        <button class="nav-pill-btn active" data-tab="stok" onclick="switchTab('stok')">Stok &amp; Scan</button>
+        <button class="nav-pill-btn" data-tab="rak" onclick="switchTab('rak')">Rak 1-11</button>
+        <button class="nav-pill-btn" data-tab="produk" onclick="switchTab('produk')">Produk &amp; Harga</button>
+        <button class="nav-pill-btn" data-tab="katalog" onclick="switchTab('katalog')">Katalog</button>
+        <button class="nav-pill-btn" data-tab="kalkulator" onclick="switchTab('kalkulator')">Kalkulator</button>
+        <button class="nav-pill-btn" data-tab="mutasi" onclick="switchTab('mutasi')">Masuk/Keluar</button>
+        <button class="nav-pill-btn" data-tab="kas" onclick="switchTab('kas')">Kas</button>
+        <button class="nav-pill-btn" data-tab="operasional" onclick="switchTab('operasional')">Dana Ops</button>
+      </nav>
+
+      <div class="nav-right-actions">
+        <button class="icon-circle-btn" title="Refresh Tab Aktif" onclick="refreshCurrentTab()">&#8635;</button>
+        <button class="btn-primary-pill" onclick="handleLogout()">
+          <span class="cta-label" id="activeUserLabel">Keluar</span>
+          <span class="arrow-badge">&#8599;</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace-grid">
+      <!-- Floating Left Vertical Dock -->
+      <aside class="left-dock" id="leftDock">
+        <button class="dock-btn active" data-tab="stok" title="Stok &amp; Barcode Scanner" onclick="switchTab('stok')">&#128247;</button>
+        <button class="dock-btn" data-tab="rak" title="Rak 1-11 (7 Lantai)" onclick="switchTab('rak')">&#9638;</button>
+        <button class="dock-btn" data-tab="produk" title="Data Produk &amp; Harga" onclick="switchTab('produk')">&#127991;</button>
+        <button class="dock-btn" data-tab="katalog" title="Katalog &amp; Spesifikasi" onclick="switchTab('katalog')">&#128444;</button>
+        <button class="dock-btn" data-tab="kalkulator" title="Kalkulator Discount" onclick="switchTab('kalkulator')">&#37;</button>
+        <div class="dock-divider"></div>
+        <button class="dock-btn" data-tab="mutasi" title="Barang Masuk &amp; Keluar" onclick="switchTab('mutasi')">&#8644;</button>
+        <button class="dock-btn" data-tab="kas" title="Buku Kas" onclick="switchTab('kas')">&#128179;</button>
+        <button class="dock-btn" data-tab="operasional" title="Dana Operasional" onclick="switchTab('operasional')">&#128188;</button>
+      </aside>
+
+      <!-- Main Content Views -->
+      <main id="mainContent">
+
+        <!-- ==================== TAB 1: STOK & BARCODE SCANNER ==================== -->
+        <section id="tab-stok" class="tab-section active">
+          <div class="page-kicker">INVENTARIS &mdash; SENSOR BARCODE &mdash; REAL-TIME</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Stok Barang &amp; Scanner</h1>
+              <p class="page-sub">Scan langsung pakai sensor barcode USB/Bluetooth atau kamera HP, lalu proses stok atau edit instan.</p>
+            </div>
+            <button class="btn-primary-pill" onclick="openProductModal(null)">
+              <span>Tambah Produk</span>
+              <span class="arrow-badge">+</span>
+            </button>
+          </div>
+
+          <div class="bento-summary">
+            <div class="bento-card">
+              <div class="bento-label">Total SKU Terdaftar</div>
+              <div class="bento-val" id="sumStokSku">0</div>
+              <div class="bento-foot">Master produk aktif</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Total Sisa Stok</div>
+              <div class="bento-val" id="sumStokQty">0</div>
+              <div class="bento-foot">Akumulasi seluruh kemasan</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Estimasi Nilai Aset</div>
+              <div class="bento-val" id="sumStokAset">Rp 0</div>
+              <div class="bento-foot">Penjumlahan otomatis (Stok x List)</div>
+            </div>
+            <div class="bento-card-dark" onclick="toggleCameraScanner()">
+              <div class="bento-dark-top">
+                <span style="font-size:12px; opacity:0.75; letter-spacing:0.08em;">KAMERA SCANNER</span>
+                <span class="bento-dark-circle">&#8599;</span>
+              </div>
+              <div>
+                <div style="font-size:17px; font-weight:600;" id="camBtnTitle">Buka Kamera Scan</div>
+                <div style="font-size:12px; opacity:0.72; margin-top:4px;">Scan barcode langsung dari kamera HP/laptop</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scanner-grid">
+            <div class="glass-panel" style="margin-bottom:0;">
+              <div class="field-label">Input Sensor Barcode (Auto-Enter USB / Bluetooth)</div>
+              <form onsubmit="event.preventDefault(); triggerBarcodeLookup();">
+                <div style="display:flex; gap:8px;">
+                  <input id="barcodeSensorInput" class="input-ctrl" type="text" placeholder="Arahkan sensor ke barcode atau ketik kode lalu Enter...">
+                  <button type="submit" class="btn-primary-pill" style="padding:8px 16px;">Cari</button>
+                </div>
+              </form>
+              <div id="cameraReader"></div>
+            </div>
+
+            <div class="glass-panel" style="margin-bottom:0;" id="scanResultPanel">
+              <div class="field-label">Hasil Scan Terakhir</div>
+              <div id="scanResultContent" class="empty-state" style="padding:18px 8px;">
+                Belum ada barcode dipindai. Gunakan sensor fisik atau kamera untuk melihat detail produk &amp; posisi rak.
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel" style="margin-top:18px;">
+            <div class="toolbar-row">
+              <div class="toolbar-search">
+                <input id="stokSearchInput" class="input-ctrl" type="text" placeholder="Cari nama cat, kode barcode, atau kemasan..." onkeydown="if(event.key==='Enter'){loadProducts(true);}">
+                <button class="btn-ghost-pill" onclick="loadProducts(true)">Cari</button>
+              </div>
+              <span class="badge badge-neutral" id="stokCountInfo">0 item</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Barcode</th>
+                    <th>Nama Produk</th>
+                    <th>Lokasi</th>
+                    <th>Kemasan</th>
+                    <th class="num-col">Qty</th>
+                    <th class="num-col">Sisa Stok</th>
+                    <th class="num-col">Harga List</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="stokTableBody"></tbody>
+              </table>
+            </div>
+            <div class="load-more-wrap" id="stokLoadMoreWrap" style="display:none;">
+              <button class="btn-ghost-pill" onclick="loadProducts(false)">Muat Lebih Banyak</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 2: RAK 1-11 (7 LANTAI) ==================== -->
+        <section id="tab-rak" class="tab-section">
+          <div class="page-kicker">PEMETAAN GUDANG &mdash; RAK I s/d XI &mdash; 7 LANTAI</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Pemetaan Rak &amp; Lantai</h1>
+              <p class="page-sub">Pilih nomor Rak (I - XI) dan Lantai (1 - 7) untuk mengecek stok dan mengedit lokasi cat.</p>
+            </div>
+            <button class="btn-primary-pill" onclick="openProductModal({ rak: state.selectedRak, lantai: state.selectedLantai === 'ALL' ? 1 : state.selectedLantai })">
+              <span>Tambah di Rak Ini</span>
+              <span class="arrow-badge">+</span>
+            </button>
+          </div>
+
+          <div class="rack-grid" id="rackTilesContainer"></div>
+
+          <div class="glass-panel">
+            <div class="toolbar-row">
+              <div class="floor-pills" id="floorPillsContainer"></div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span class="badge badge-gold" id="rakAutoSumSku">0 Produk</span>
+                <span class="badge badge-ok" id="rakAutoSumStok">Total Stok: 0</span>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rak / Lantai</th>
+                    <th>Barcode</th>
+                    <th>Nama Produk</th>
+                    <th>Kemasan</th>
+                    <th class="num-col">Qty</th>
+                    <th class="num-col">Sisa Stok</th>
+                    <th>Catatan</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="rakTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 3: DATA PRODUK & HARGA ==================== -->
+        <section id="tab-produk" class="tab-section">
+          <div class="page-kicker">MASTER KATALOG HARGA &mdash; LIST &bull; PPN &bull; DISC 1 &bull; DISC 2</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Data Produk &amp; Harga</h1>
+              <p class="page-sub">Kelola satuan Liter, Kilogram, Kilogram Perset, beserta perhitungan otomatis PPN, Discount 1 &amp; Discount 2.</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn-ghost-pill" onclick="openPastaModal(null)">+ Catat Pasta Kosong</button>
+              <button class="btn-primary-pill" onclick="openProductModal(null)">
+                <span>Produk Baru</span>
+                <span class="arrow-badge">+</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="toolbar-row">
+              <div class="toolbar-search">
+                <input id="produkSearchInput" class="input-ctrl" type="text" placeholder="Filter nama produk, kemasan, atau barcode..." onkeydown="if(event.key==='Enter'){loadPriceProducts(true);}">
+                <button class="btn-ghost-pill" onclick="loadPriceProducts(true)">Filter</button>
+              </div>
+              <span class="badge badge-neutral" id="produkTotalBadge">0 item</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama Produk</th>
+                    <th class="num-col">Qty</th>
+                    <th class="num-col">Sisa</th>
+                    <th>Kemasan</th>
+                    <th class="num-col">Harga List</th>
+                    <th class="num-col">Harga PPN</th>
+                    <th class="num-col">Disc 1</th>
+                    <th class="num-col">Disc 2</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="produkTableBody"></tbody>
+              </table>
+            </div>
+            <div class="load-more-wrap" id="produkLoadMoreWrap" style="display:none;">
+              <button class="btn-ghost-pill" onclick="loadPriceProducts(false)">Muat Lebih Banyak</button>
+            </div>
+          </div>
+
+          <!-- Sub-panel Pasta Yang Tidak Ada -->
+          <div class="glass-panel">
+            <div class="toolbar-row" style="margin-bottom:10px;">
+              <div>
+                <div class="field-label" style="margin-bottom:2px;">DAFTAR PASTA TINTING</div>
+                <h3 style="font-size:16px; font-weight:700;">Pasta Yang Tidak Ada / Kosong</h3>
+              </div>
+              <button class="btn-ghost-pill" onclick="openPastaModal(null)">+ Tambah Pasta</button>
+            </div>
+            <div class="table-wrap">
+              <table style="min-width:480px;">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Kode Pasta</th>
+                    <th>Status</th>
+                    <th>Tanggal Lapor</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="pastaTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 4: KATALOG & SPESIFIKASI (GOOGLE DRIVE LH3) ==================== -->
+        <section id="tab-katalog" class="tab-section">
+          <div class="page-kicker">KATALOG VISUAL &mdash; SPESIFIKASI TEKNIS &mdash; GOOGLE DRIVE LH3</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Katalog &amp; Spesifikasi Produk</h1>
+              <p class="page-sub">Upload foto/video langsung ke Google Drive (format link lh3 anti-rusak) lengkap dengan spesifikasi teknis cat.</p>
+            </div>
+            <button class="btn-primary-pill" onclick="openCatalogModal(null)">
+              <span>Tambah Katalog</span>
+              <span class="arrow-badge">+</span>
+            </button>
+          </div>
+
+          <div class="glass-panel">
+            <div class="toolbar-row">
+              <div class="toolbar-search">
+                <input id="katalogSearchInput" class="input-ctrl" type="text" placeholder="Cari nama produk, kategori cat, atau kode warna..." onkeydown="if(event.key==='Enter'){loadCatalog(true);}">
+                <button class="btn-ghost-pill" onclick="loadCatalog(true)">Cari</button>
+              </div>
+              <span class="badge badge-gold" id="katalogCountBadge">0 katalog</span>
+            </div>
+
+            <div class="catalog-grid" id="catalogGridContainer"></div>
+
+            <div class="load-more-wrap" id="katalogLoadMoreWrap" style="display:none;">
+              <button class="btn-ghost-pill" onclick="loadCatalog(false)">Muat Katalog Lainnya</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 5: KALKULATOR DISCOUNT & PENJUMLAHAN OTOMATIS ==================== -->
+        <section id="tab-kalkulator" class="tab-section">
+          <div class="page-kicker">SIMULASI HARGA &mdash; PPN &bull; DISCOUNT BERTINGKAT &bull; PENJUMLAHAN OTOMATIS</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Kalkulator Discount</h1>
+              <p class="page-sub">Hitung cepat Harga List, PPN (11%), Discount 1, Discount 2, serta akumulasi keranjang multi-item otomatis.</p>
+            </div>
+            <button class="btn-ghost-pill" onclick="clearCalcCart()">Reset Keranjang</button>
+          </div>
+
+          <div class="calc-grid">
+            <div class="glass-panel" style="margin-bottom:0;">
+              <form id="calcForm" onsubmit="event.preventDefault(); addCalcToCart();">
+                <div class="field-group">
+                  <label class="field-label">Ambil Cepat dari Produk Tersimpan (Opsional)</label>
+                  <select id="calcProductSelect" class="select-ctrl" onchange="applyCalcProductPreset()">
+                    <option value="">-- Input Manual --</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Nama Item</label>
+                  <input id="calcItemName" class="input-ctrl" type="text" placeholder="Contoh: TENNOKOTE 1000 WA 22.5 KG" required>
+                </div>
+                <div class="form-grid-2">
+                  <div class="field-group">
+                    <label class="field-label">Harga List (Rp)</label>
+                    <input id="calcHargaList" class="input-ctrl" type="number" min="0" value="0" oninput="recalcPreview()">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Qty</label>
+                    <input id="calcQty" class="input-ctrl" type="number" min="1" value="1" oninput="recalcPreview()">
+                  </div>
+                </div>
+                <div class="form-grid-3">
+                  <div class="field-group">
+                    <label class="field-label">Mode PPN</label>
+                    <select id="calcPpnMode" class="select-ctrl" onchange="recalcPreview()">
+                      <option value="div111">Bagi 1.11 (Excel)</option>
+                      <option value="none">Tanpa PPN (0%)</option>
+                      <option value="add11">Tambah PPN +11%</option>
+                    </select>
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Discount 1 (%)</label>
+                    <input id="calcDisc1" class="input-ctrl" type="number" step="0.1" min="0" max="100" value="7.5" oninput="recalcPreview()">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Discount 2 (%)</label>
+                    <input id="calcDisc2" class="input-ctrl" type="number" step="0.1" min="0" max="100" value="2.5" oninput="recalcPreview()">
+                  </div>
+                </div>
+
+                <div class="calc-result-box">
+                  <div class="calc-line"><span>Dasar Setelah PPN</span><strong id="prevAfterPpn">Rp 0</strong></div>
+                  <div class="calc-line"><span>Setelah Discount 1</span><strong id="prevAfterD1">Rp 0</strong></div>
+                  <div class="calc-line"><span>Harga Nett Satuan (Disc 2)</span><strong id="prevNettUnit">Rp 0</strong></div>
+                  <div class="calc-line"><span>Total Hemat / Potongan</span><strong id="prevSaving">Rp 0</strong></div>
+                  <div class="calc-line total"><span>Subtotal Item</span><span id="prevSubtotal">Rp 0</span></div>
+                </div>
+
+                <div style="margin-top:14px; display:flex; gap:10px;">
+                  <button type="submit" class="btn-primary-pill" style="flex:1;">
+                    <span id="calcSubmitLabel">Tambah ke Daftar Hitung</span>
+                    <span class="arrow-badge">+</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="glass-panel" style="margin-bottom:0;">
+              <div class="toolbar-row">
+                <div>
+                  <div class="field-label" style="margin-bottom:2px;">PENJUMLAHAN OTOMATIS</div>
+                  <h3 style="font-size:17px; font-weight:700;">Keranjang Simulasi Harga</h3>
+                </div>
+                <span class="badge badge-gold" id="calcCartCount">0 item</span>
+              </div>
+
+              <div class="table-wrap">
+                <table style="min-width:460px;">
+                  <thead>
+                    <tr>
+                      <th>Produk</th>
+                      <th class="num-col">Qty</th>
+                      <th class="num-col">Nett/Unit</th>
+                      <th class="num-col">Total</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="calcCartBody"></tbody>
+                </table>
+              </div>
+
+              <div class="calc-result-box" style="margin-top:16px;">
+                <div class="calc-line"><span>Total Harga List Bruto</span><strong id="cartTotalBruto">Rp 0</strong></div>
+                <div class="calc-line"><span>Total Potongan Diskon</span><strong id="cartTotalDisc">Rp 0</strong></div>
+                <div class="calc-line total"><span>GRAND TOTAL</span><span id="cartGrandTotal">Rp 0</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 6: BARANG MASUK & KELUAR ==================== -->
+        <section id="tab-mutasi" class="tab-section">
+          <div class="page-kicker">LOGISTIK &mdash; BARANG MASUK &amp; KELUAR</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Barang Masuk &amp; Keluar</h1>
+              <p class="page-sub">Setiap pencatatan &amp; edit mutasi otomatis menyinkronkan Sisa Stok pada master produk.</p>
+            </div>
+            <button class="btn-primary-pill" onclick="openMutationModal(null)">
+              <span>Catat Mutasi</span>
+              <span class="arrow-badge">+</span>
+            </button>
+          </div>
+
+          <div class="bento-summary">
+            <div class="bento-card">
+              <div class="bento-label">Total Qty Masuk</div>
+              <div class="bento-val" id="sumMutasiIn">0</div>
+              <div class="bento-foot">Penjumlahan otomatis barang masuk</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Total Qty Keluar</div>
+              <div class="bento-val" id="sumMutasiOut">0</div>
+              <div class="bento-foot">Penjumlahan otomatis barang keluar</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Nominal Barang Keluar</div>
+              <div class="bento-val" id="sumMutasiNominal">Rp 0</div>
+              <div class="bento-foot">Total nilai penjualan tercatat</div>
+            </div>
+            <div class="bento-card-dark" onclick="openMutationModal(null)">
+              <div class="bento-dark-top">
+                <span style="font-size:12px; opacity:0.75;">AKSI CEPAT</span>
+                <span class="bento-dark-circle">+</span>
+              </div>
+              <div>
+                <div style="font-size:17px; font-weight:600;">Input Masuk / Keluar</div>
+                <div style="font-size:12px; opacity:0.72; margin-top:4px;">ID sekuensial reset harian otomatis</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="toolbar-row">
+              <div class="toolbar-search">
+                <input id="mutasiSearchInput" class="input-ctrl" type="text" placeholder="Cari nama barang, tanggal, atau tujuan pengiriman..." onkeydown="if(event.key==='Enter'){loadMutations(true);}">
+                <select id="mutasiTipeFilter" class="select-ctrl" style="max-width:150px;" onchange="loadMutations(true)">
+                  <option value="ALL">Semua Tipe</option>
+                  <option value="MASUK">MASUK</option>
+                  <option value="KELUAR">KELUAR</option>
+                </select>
+                <button class="btn-ghost-pill" onclick="loadMutations(true)">Filter</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID / Tanggal</th>
+                    <th>Tipe</th>
+                    <th>Nama Barang</th>
+                    <th class="num-col">Jumlah</th>
+                    <th>Kemasan</th>
+                    <th class="num-col">Harga Total</th>
+                    <th>Keterangan / Tujuan</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="mutasiTableBody"></tbody>
+              </table>
+            </div>
+            <div class="load-more-wrap" id="mutasiLoadMoreWrap" style="display:none;">
+              <button class="btn-ghost-pill" onclick="loadMutations(false)">Muat Lebih Banyak</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 7: BUKU KAS ==================== -->
+        <section id="tab-kas" class="tab-section">
+          <div class="page-kicker">KEUANGAN TOKO &mdash; KAS UTAMA</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Buku Kas</h1>
+              <p class="page-sub">Pencatatan kas masuk &amp; keluar lengkap dengan model pembayaran, remark, penjumlahan otomatis, dan fitur edit.</p>
+            </div>
+            <button class="btn-primary-pill" onclick="openLedgerModal('kas', null)">
+              <span>Tambah Transaksi Kas</span>
+              <span class="arrow-badge">+</span>
+            </button>
+          </div>
+
+          <div class="bento-summary">
+            <div class="bento-card">
+              <div class="bento-label">Total Kas Masuk (IN)</div>
+              <div class="bento-val" style="color:var(--success);" id="sumKasIn">Rp 0</div>
+              <div class="bento-foot">Penjumlahan otomatis pemasukan</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Total Kas Keluar (OUT)</div>
+              <div class="bento-val" style="color:var(--danger);" id="sumKasOut">Rp 0</div>
+              <div class="bento-foot">Penjumlahan otomatis pengeluaran</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Saldo Kas Berjalan</div>
+              <div class="bento-val" id="sumKasSaldo">Rp 0</div>
+              <div class="bento-foot">Total IN dikurangi Total OUT</div>
+            </div>
+            <div class="bento-card-dark" onclick="openLedgerModal('kas', null)">
+              <div class="bento-dark-top">
+                <span style="font-size:12px; opacity:0.75;">TRANSAKSI BARU</span>
+                <span class="bento-dark-circle">+</span>
+              </div>
+              <div>
+                <div style="font-size:17px; font-weight:600;">Catat Kas Harian</div>
+                <div style="font-size:12px; opacity:0.72; margin-top:4px;">Format ID KAS-YYYYMMDD-0001</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="toolbar-row">
+              <div class="toolbar-search">
+                <input id="kasSearchInput" class="input-ctrl" type="text" placeholder="Cari keterangan, remark customer/supplier, metode bayar..." onkeydown="if(event.key==='Enter'){loadLedger('kas', true);}">
+                <button class="btn-ghost-pill" onclick="loadLedger('kas', true)">Cari</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID / Tanggal</th>
+                    <th>Keterangan</th>
+                    <th class="num-col">IN (Masuk)</th>
+                    <th class="num-col">OUT (Keluar)</th>
+                    <th>Model Pembayaran</th>
+                    <th>Remark</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="kasTableBody"></tbody>
+              </table>
+            </div>
+            <div class="load-more-wrap" id="kasLoadMoreWrap" style="display:none;">
+              <button class="btn-ghost-pill" onclick="loadLedger('kas', false)">Muat Lebih Banyak</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 8: DANA OPERASIONAL ==================== -->
+        <section id="tab-operasional" class="tab-section">
+          <div class="page-kicker">KEUANGAN TOKO &mdash; DANA OPERASIONAL</div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title">Dana Operasional</h1>
+              <p class="page-sub">Catatan khusus pemasukan &amp; biaya operasional toko terpisah dari kas penjualan utama.</p>
+            </div>
+            <button class="btn-primary-pill" onclick="openLedgerModal('ops', null)">
+              <span>Tambah Dana Ops</span>
+              <span class="arrow-badge">+</span>
+            </button>
+          </div>
+
+          <div class="bento-summary">
+            <div class="bento-card">
+              <div class="bento-label">Total Dana Masuk (IN)</div>
+              <div class="bento-val" style="color:var(--success);" id="sumOpsIn">Rp 0</div>
+              <div class="bento-foot">Penjumlahan otomatis dana masuk</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Total Biaya Keluar (OUT)</div>
+              <div class="bento-val" style="color:var(--danger);" id="sumOpsOut">Rp 0</div>
+              <div class="bento-foot">Penjumlahan otomatis biaya ops</div>
+            </div>
+            <div class="bento-card">
+              <div class="bento-label">Sisa Dana Operasional</div>
+              <div class="bento-val" id="sumOpsSaldo">Rp 0</div>
+              <div class="bento-foot">Total IN dikurangi Total OUT</div>
+            </div>
+            <div class="bento-card-dark" onclick="openLedgerModal('ops', null)">
+              <div class="bento-dark-top">
+                <span style="font-size:12px; opacity:0.75;">BIAYA OPERASIONAL</span>
+                <span class="bento-dark-circle">+</span>
+              </div>
+              <div>
+                <div style="font-size:17px; font-weight:600;">Catat Operasional</div>
+                <div style="font-size:12px; opacity:0.72; margin-top:4px;">Format ID OPR-YYYYMMDD-0001</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="toolbar-row">
+              <div class="toolbar-search">
+                <input id="opsSearchInput" class="input-ctrl" type="text" placeholder="Cari biaya operasional, tanggal, remark..." onkeydown="if(event.key==='Enter'){loadLedger('ops', true);}">
+                <button class="btn-ghost-pill" onclick="loadLedger('ops', true)">Cari</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID / Tanggal</th>
+                    <th>Keterangan</th>
+                    <th class="num-col">IN (Masuk)</th>
+                    <th class="num-col">OUT (Keluar)</th>
+                    <th>Model Pembayaran</th>
+                    <th>Remark</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="opsTableBody"></tbody>
+              </table>
+            </div>
+            <div class="load-more-wrap" id="opsLoadMoreWrap" style="display:none;">
+              <button class="btn-ghost-pill" onclick="loadLedger('ops', false)">Muat Lebih Banyak</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH / EDIT PRODUK ================= -->
+  <div id="productModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="productModalTitle">Tambah Produk</h3>
+        <button class="icon-circle-btn" style="width:34px;height:34px;" onclick="closeModal('productModal')">&times;</button>
+      </div>
+      <form id="productForm" onsubmit="event.preventDefault(); submitProductForm();">
+        <input type="hidden" id="prodId">
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Kode Barcode (Scan / Manual)</label>
+            <input id="prodBarcode" class="input-ctrl" type="text" placeholder="Otomatis jika dikosongkan">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nama Produk *</label>
+            <input id="prodNama" class="input-ctrl" type="text" required>
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="field-group">
+            <label class="field-label">Rak (I - XI)</label>
+            <select id="prodRak" class="select-ctrl">
+              <option value="I">Rak I</option><option value="II">Rak II</option><option value="III">Rak III</option>
+              <option value="IV">Rak IV</option><option value="V">Rak V</option><option value="VI">Rak VI</option>
+              <option value="VII">Rak VII</option><option value="VIII">Rak VIII</option><option value="IX">Rak IX</option>
+              <option value="X">Rak X</option><option value="XI">Rak XI</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Lantai (1 - 7)</label>
+            <select id="prodLantai" class="select-ctrl">
+              <option value="1">Lantai 1</option><option value="2">Lantai 2</option><option value="3">Lantai 3</option>
+              <option value="4">Lantai 4</option><option value="5">Lantai 5</option><option value="6">Lantai 6</option>
+              <option value="7">Lantai 7</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Catatan Stok</label>
+            <input id="prodCatatan" class="input-ctrl" type="text" placeholder="Stock Padil / note">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Qty Awal</label>
+            <input id="prodQty" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Sisa Stok</label>
+            <input id="prodSisa" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Ukuran Kemasan</label>
+            <input id="prodNilaiKem" class="input-ctrl" type="text" placeholder="Misal: 1, 4.5, 20, 22.5">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Satuan Kemasan</label>
+            <select id="prodSatuanKem" class="select-ctrl">
+              <option value="Liter">Liter</option>
+              <option value="Kilogram">Kilogram</option>
+              <option value="Kilogram Perset">Kilogram Perset</option>
+              <option value="Liter Perset">Liter Perset</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Harga List (Rp) &mdash; Auto Hitung</label>
+            <input id="prodHargaList" class="input-ctrl" type="number" min="0" value="0" oninput="autoCalcProductPrices()">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Harga PPN (List / 1.11)</label>
+            <input id="prodHargaPpn" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Harga Discount 1</label>
+            <input id="prodHargaDisc1" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Harga Discount 2</label>
+            <input id="prodHargaDisc2" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost-pill" onclick="closeModal('productModal')">Batal</button>
+          <button type="submit" class="btn-primary-pill" id="btnSaveProd"><span>Simpan Produk</span><span class="arrow-badge">&#10003;</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH / EDIT KATALOG + UPLOAD DRIVE LH3 ================= -->
+  <div id="catalogModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="catalogModalTitle">Tambah Katalog Produk</h3>
+        <button class="icon-circle-btn" style="width:34px;height:34px;" onclick="closeModal('catalogModal')">&times;</button>
+      </div>
+      <form id="catalogForm" onsubmit="event.preventDefault(); submitCatalogForm();">
+        <input type="hidden" id="katId">
+        <input type="hidden" id="katDriveFileId">
+        <input type="hidden" id="katMediaTipe" value="FOTO">
+        <input type="hidden" id="katMediaUrl">
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Nama Produk *</label>
+            <input id="katNama" class="input-ctrl" type="text" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Kategori Cat</label>
+            <input id="katKategori" class="input-ctrl" type="text" placeholder="Cat Tembok / Epoxy / Kayu / Lapangan">
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="field-group">
+            <label class="field-label">Kode Warna</label>
+            <input id="katWarna" class="input-ctrl" type="text" placeholder="Misal: 6439 Dark Blue">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Kemasan</label>
+            <input id="katKemasan" class="input-ctrl" type="text" placeholder="Misal: 22.5 Kilogram">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Harga Tampil (Rp)</label>
+            <input id="katHarga" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Daya Sebar Teoritis</label>
+            <input id="katDayaSebar" class="input-ctrl" type="text" placeholder="Misal: 8 - 10 m2/kg">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Pengencer</label>
+            <input id="katPengencer" class="input-ctrl" type="text" placeholder="Air Bersih / Thinner">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Waktu Kering</label>
+            <input id="katWaktuKering" class="input-ctrl" type="text" placeholder="Sentuh 30 mnt / Total 2 jam">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Aplikasi Permukaan</label>
+            <input id="katAplikasi" class="input-ctrl" type="text" placeholder="Beton, Tembok, Seng, Besi">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Deskripsi &amp; Spesifikasi Lengkap</label>
+          <textarea id="katDeskripsi" class="textarea-ctrl" rows="3" placeholder="Keunggulan, cara pakai, rekomendasi primer..."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Upload Foto / Video dari Penyimpanan (Otomatis ke Google Drive Format lh3)</label>
+          <input id="katFileInput" class="input-ctrl" type="file" accept="image/*,video/*" onchange="previewSelectedMedia()">
+          <div id="katMediaPreview" class="media-preview-box"></div>
+          <div id="katUploadStatus" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost-pill" onclick="closeModal('catalogModal')">Batal</button>
+          <button type="submit" class="btn-primary-pill" id="btnSaveKat"><span>Simpan Katalog</span><span class="arrow-badge">&#10003;</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DETAIL SPESIFIKASI KATALOG ================= -->
+  <div id="catalogDetailModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="detKatTitle">Spesifikasi Produk</h3>
+        <button class="icon-circle-btn" style="width:34px;height:34px;" onclick="closeModal('catalogDetailModal')">&times;</button>
+      </div>
+      <div id="detKatBody"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH / EDIT MUTASI STOK ================= -->
+  <div id="mutationModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="mutationModalTitle">Catat Barang Masuk / Keluar</h3>
+        <button class="icon-circle-btn" style="width:34px;height:34px;" onclick="closeModal('mutationModal')">&times;</button>
+      </div>
+      <form id="mutationForm" onsubmit="event.preventDefault(); submitMutationForm();">
+        <input type="hidden" id="mutId">
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Tanggal (DD/MM/YYYY)</label>
+            <input id="mutTanggal" class="input-ctrl" type="text" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tipe Mutasi</label>
+            <select id="mutTipe" class="select-ctrl">
+              <option value="KELUAR">BARANG KELUAR</option>
+              <option value="MASUK">BARANG MASUK</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Barcode Produk (Opsional)</label>
+            <input id="mutBarcode" class="input-ctrl" type="text">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nama Barang *</label>
+            <input id="mutNama" class="input-ctrl" type="text" required>
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="field-group">
+            <label class="field-label">Jumlah *</label>
+            <input id="mutJumlah" class="input-ctrl" type="number" min="1" value="1" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Kemasan</label>
+            <input id="mutKemasan" class="input-ctrl" type="text" placeholder="1 KG / 5 KG / 20 KSP">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Harga Total (Rp)</label>
+            <input id="mutHarga" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Keterangan / Tujuan Pengiriman</label>
+          <input id="mutKet" class="input-ctrl" type="text" placeholder="Contoh: DI ANTAR KE TOKO / DI JEMPUT DI GUDANG PROPAN">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost-pill" onclick="closeModal('mutationModal')">Batal</button>
+          <button type="submit" class="btn-primary-pill" id="btnSaveMut"><span>Simpan Mutasi</span><span class="arrow-badge">&#10003;</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH / EDIT KAS & DANA OPERASIONAL ================= -->
+  <div id="ledgerModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="ledgerModalTitle">Transaksi Keuangan</h3>
+        <button class="icon-circle-btn" style="width:34px;height:34px;" onclick="closeModal('ledgerModal')">&times;</button>
+      </div>
+      <form id="ledgerForm" onsubmit="event.preventDefault(); submitLedgerForm();">
+        <input type="hidden" id="ledMode">
+        <input type="hidden" id="ledId">
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">Tanggal (DD/MM/YYYY) *</label>
+            <input id="ledTanggal" class="input-ctrl" type="text" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Model Pembayaran *</label>
+            <input id="ledPayment" class="input-ctrl" type="text" placeholder="CASH / TF BCA / QRIS" required>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Keterangan *</label>
+          <textarea id="ledKet" class="textarea-ctrl" rows="2" required></textarea>
+        </div>
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label">IN / Pemasukan (Rp)</label>
+            <input id="ledIn" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+          <div class="field-group">
+            <label class="field-label">OUT / Pengeluaran (Rp)</label>
+            <input id="ledOut" class="input-ctrl" type="number" min="0" value="0">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Remark (Customer / Supplier / Catatan)</label>
+          <input id="ledRemark" class="input-ctrl" type="text">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost-pill" onclick="closeModal('ledgerModal')">Batal</button>
+          <button type="submit" class="btn-primary-pill" id="btnSaveLed"><span>Simpan Transaksi</span><span class="arrow-badge">&#10003;</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL PASTA KOSONG ================= -->
+  <div id="pastaModal" class="modal-backdrop">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="pastaModalTitle">Catat Pasta Kosong</h3>
+        <button class="icon-circle-btn" style="width:34px;height:34px;" onclick="closeModal('pastaModal')">&times;</button>
+      </div>
+      <form id="pastaForm" onsubmit="event.preventDefault(); submitPastaForm();">
+        <input type="hidden" id="pstId">
+        <div class="field-group">
+          <label class="field-label">Kode Pasta *</label>
+          <input id="pstKode" class="input-ctrl" type="text" placeholder="Contoh: PASTA 8W1" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Status</label>
+          <select id="pstStatus" class="select-ctrl">
+            <option value="KOSONG">KOSONG</option>
+            <option value="DIPESAN">DIPESAN</option>
+            <option value="TERSEDIA">TERSEDIA</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tanggal Lapor</label>
+          <input id="pstTanggal" class="input-ctrl" type="text">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost-pill" onclick="closeModal('pastaModal')">Batal</button>
+          <button type="submit" class="btn-primary-pill"><span>Simpan</span><span class="arrow-badge">&#10003;</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Container Toast Kustom -->
+  <div id="toastBox"></div>
+
+  <script>
+    /* =====================================================================
+     * CLIENT SCRIPT - CLASSIC STRING CONCATENATION (BEBAS BACKTICK)
+     * GEMINI CANVAS FRIENDLY + OPTIMISTIC UI + SERVER-SIDE TOKEN AUTH
+     * ===================================================================== */
+
+    var SESSION_KEY = 'CM_SESSION_TOKEN_V1';
+    var state = {
+      token: '',
+      user: null,
+      activeTab: 'stok',
+      products: [],
+      prodOffset: 0,
+      priceProducts: [],
+      priceOffset: 0,
+      selectedRak: 'I',
+      selectedLantai: 'ALL',
+      rakItems: [],
+      racksSummary: [],
+      catalogs: [],
+      katOffset: 0,
+      mutations: [],
+      mutOffset: 0,
+      kasItems: [],
+      kasOffset: 0,
+      opsItems: [],
+      opsOffset: 0,
+      pastaItems: [],
+      calcCart: [],
+      calcEditIdx: -1,
+      lastScanned: null,
+      cameraScanner: null,
+      cameraActive: false
+    };
+
+    /* ============ UTILITIES & FORMATTER ============ */
+    function escHtml(str) {
+      return String(str === null || str === undefined ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function fmtRp(val) {
+      var n = Math.round(Number(val) || 0);
+      var sign = n < 0 ? '-' : '';
+      var absStr = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return sign + 'Rp ' + absStr;
+    }
+
+    function todayDisplay() {
+      var d = new Date();
+      var dd = ('0' + d.getDate()).slice(-2);
+      var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+      return dd + '/' + mm + '/' + d.getFullYear();
+    }
+
+    function showToast(msg, type) {
+      var box = document.getElementById('toastBox');
+      var el = document.createElement('div');
+      el.className = 'toast-item ' + (type || '');
+      el.textContent = msg;
+      box.appendChild(el);
+      setTimeout(function() {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 3400);
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    /* ============ SAFE GAS CALLER (GEMINI CANVAS FRIENDLY) ============ */
+    function callServer(fnName, args, onSuccess, onFail) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        var runner = google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.unauthorized) {
+              forceLogoutUI(res.message || 'Sesi kedaluwarsa. Silakan login kembali.');
+              return;
+            }
+            if (onSuccess) onSuccess(res);
+          })
+          .withFailureHandler(function(err) {
+            showToast('Server error: ' + (err && err.message ? err.message : err), 'err');
+            if (onFail) onFail(err);
+          });
+        runner[fnName].apply(runner, args);
+      } else {
+        // Mode Preview Gemini Canvas (bebas ReferenceError tanpa backend GAS)
+        if (fnName === 'loginUser') {
+          var ph = String(args[0] || '').replace(/[^0-9]/g, '');
+          if (ph === '087891948192' || ph === '081270786968') {
+            if (onSuccess) onSuccess({ success: true, token: 'PREVIEW_TOKEN_DEMO', user: { phone: ph, name: 'Preview Admin' } });
+          } else {
+            if (onSuccess) onSuccess({ success: false, message: 'Gunakan nomor 087891948192 atau 081270786968.' });
+          }
+        } else if (fnName === 'checkSession') {
+          if (onSuccess) onSuccess({ success: false, unauthorized: true });
+        } else {
+          if (onSuccess) onSuccess({
+            success: true,
+            items: [],
+            racks: [],
+            totalFiltered: 0,
+            hasMore: false,
+            summary: { totalSku: 0, totalStok: 0, totalNilaiAset: 0, totalIn: 0, totalOut: 0, saldo: 0, totalInQty: 0, totalOutQty: 0, totalNominalOut: 0 }
+          });
+        }
+      }
+    }
+
+    /* ============ AUTENTIKASI & SESI SERVER-SIDE ============ */
+    function initApp() {
+      buildFloorPills();
+      renderRackTiles();
+      renderCalcCart();
+      recalcPreview();
+
+      var savedToken = '';
+      try { savedToken = sessionStorage.getItem(SESSION_KEY) || ''; } catch (e) {}
+      if (savedToken) {
+        callServer('checkSession', [savedToken], function(res) {
+          if (res && res.success && res.user) {
+            state.token = savedToken;
+            state.user = res.user;
+            enterAuthenticatedUI();
+          } else {
+            forceLogoutUI();
+          }
+        });
+      }
+    }
+
+    function handleLoginSubmit() {
+      var phone = String(document.getElementById('loginPhone').value || '').trim();
+      var pin = String(document.getElementById('loginPin').value || '').trim();
+      var btn = document.getElementById('btnLoginSubmit');
+      btn.disabled = true;
+
+      callServer('loginUser', [phone, pin], function(res) {
+        btn.disabled = false;
+        if (res && res.success) {
+          state.token = String(res.token);
+          state.user = res.user;
+          try { sessionStorage.setItem(SESSION_KEY, state.token); } catch (e) {}
+          showToast(res.message || 'Login berhasil', 'ok');
+          enterAuthenticatedUI();
+        } else {
+          showToast((res && res.message) || 'Login gagal.', 'err');
+        }
+      }, function() {
+        btn.disabled = false;
+      });
+    }
+
+    function enterAuthenticatedUI() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appShell').style.display = 'block';
+      document.getElementById('activeUserLabel').textContent = (state.user && state.user.phone ? state.user.phone.slice(-4) : 'Admin') + ' \u2022 Keluar';
+      loadProducts(true);
+      loadRackSummary();
+    }
+
+    function handleLogout() {
+      var tk = state.token;
+      callServer('logoutUser', [tk], function() {
+        forceLogoutUI('Anda telah keluar dengan aman.');
+      });
+    }
+
+    function forceLogoutUI(msg) {
+      stopCameraScanner();
+      state.token = '';
+      state.user = null;
+      state.products = [];
+      state.kasItems = [];
+      state.opsItems = [];
+      state.catalogs = [];
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+      document.getElementById('appShell').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginPin').value = '';
+      if (msg) showToast(msg, 'err');
+    }
+
+    /* ============ NAVIGASI TAB ============ */
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      var sections = document.querySelectorAll('.tab-section');
+      for (var i = 0; i < sections.length; i++) {
+        sections[i].classList.remove('active');
+      }
+      var target = document.getElementById('tab-' + tabName);
+      if (target) target.classList.add('active');
+
+      var navBtns = document.querySelectorAll('[data-tab]');
+      for (var j = 0; j < navBtns.length; j++) {
+        if (navBtns[j].getAttribute('data-tab') === tabName) {
+          navBtns[j].classList.add('active');
+        } else {
+          navBtns[j].classList.remove('active');
+        }
+      }
+
+      if (tabName !== 'stok') stopCameraScanner();
+      refreshCurrentTab();
+    }
+
+    function refreshCurrentTab() {
+      if (!state.token) return;
+      if (state.activeTab === 'stok') {
+        loadProducts(true);
+      } else if (state.activeTab === 'rak') {
+        loadRackSummary();
+        loadRackItems();
+      } else if (state.activeTab === 'produk') {
+        loadPriceProducts(true);
+        loadPastaKosong();
+      } else if (state.activeTab === 'katalog') {
+        loadCatalog(true);
+      } else if (state.activeTab === 'kalkulator') {
+        populateCalcSelect();
+      } else if (state.activeTab === 'mutasi') {
+        loadMutations(true);
+      } else if (state.activeTab === 'kas') {
+        loadLedger('kas', true);
+      } else if (state.activeTab === 'operasional') {
+        loadLedger('ops', true);
+      }
+    }
+
+    /* ============ TAB 1: STOK & BARCODE SCANNER ============ */
+    function loadProducts(reset) {
+      if (reset) {
+        state.prodOffset = 0;
+        state.products = [];
+      }
+      var q = String(document.getElementById('stokSearchInput').value || '').trim();
+      callServer('getProducts', [state.token, { search: q, offset: state.prodOffset, limit: 25 }], function(res) {
+        if (!res || !res.success) return;
+        var incoming = res.items || [];
+        state.products = reset ? incoming : state.products.concat(incoming);
+        state.prodOffset = state.products.length;
+        renderStokTable();
+        updateStokSummary(res.summary);
+        document.getElementById('stokCountInfo').textContent = String(res.totalFiltered || state.products.length) + ' item';
+        document.getElementById('stokLoadMoreWrap').style.display = res.hasMore ? 'block' : 'none';
+        populateCalcSelect();
+      });
+    }
+
+    function updateStokSummary(sum) {
+      if (!sum) return;
+      document.getElementById('sumStokSku').textContent = String(sum.totalSku || 0);
+      document.getElementById('sumStokQty').textContent = String(sum.totalStok || 0);
+      document.getElementById('sumStokAset').textContent = fmtRp(sum.totalNilaiAset || 0);
+    }
+
+    function renderStokTable() {
+      var tbody = document.getElementById('stokTableBody');
+      if (!state.products.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada data stok ditampilkan.</td></tr>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < state.products.length; i++) {
+        var p = state.products[i];
+        var stokBadge = p.sisaStok <= 1 ? 'badge-low' : 'badge-ok';
+        html += '<tr>' +
+          '<td><span class="badge badge-neutral">' + escHtml(p.barcode || '-') + '</span></td>' +
+          '<td><strong>' + escHtml(p.nama) + '</strong></td>' +
+          '<td>Rak ' + escHtml(p.rak) + ' &bull; Lt ' + escHtml(p.lantai) + '</td>' +
+          '<td>' + escHtml(p.nilaiKemasan + ' ' + p.satuanKemasan) + '</td>' +
+          '<td class="num-col">' + escHtml(p.qty) + '</td>' +
+          '<td class="num-col"><span class="badge ' + stokBadge + '">' + escHtml(p.sisaStok) + '</span></td>' +
+          '<td class="num-col">' + escHtml(fmtRp(p.hargaList)) + '</td>' +
+          '<td><button class="btn-sm-edit" data-edit-prod="' + escHtml(p.id) + '" onclick="editProductById(this.getAttribute(\'data-edit-prod\'))">Edit</button></td>' +
+          '</tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    function triggerBarcodeLookup(overrideCode) {
+      var inputEl = document.getElementById('barcodeSensorInput');
+      var code = String(overrideCode !== undefined ? overrideCode : inputEl.value).trim();
+      if (!code) return;
+      callServer('scanBarcodeProduct', [state.token, code], function(res) {
+        var box = document.getElementById('scanResultContent');
+        if (res && res.success && res.item) {
+          var p = res.item;
+          showToast('Barcode ditemukan: ' + p.nama, 'ok');
+          box.className = '';
+          box.innerHTML =
+            '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">' +
+              '<div>' +
+                '<span class="badge badge-gold">Rak ' + escHtml(p.rak) + ' / Lantai ' + escHtml(p.lantai) + '</span>' +
+                '<div style="font-size:16px; font-weight:700; margin-top:6px;">' + escHtml(p.nama) + '</div>' +
+                '<div style="font-size:12.5px; color:var(--text-muted); margin-top:3px;">Barcode: ' + escHtml(p.barcode) + ' &bull; ' + escHtml(p.nilaiKemasan + ' ' + p.satuanKemasan) + '</div>' +
+              '</div>' +
+              '<div style="text-align:right;">' +
+                '<div style="font-size:11px; color:var(--text-muted);">SISA STOK</div>' +
+                '<div style="font-size:22px; font-weight:700;">' + escHtml(p.sisaStok) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">' +
+              '<button class="btn-sm-edit" onclick="editScannedItem()">Edit Produk</button>' +
+              '<button class="btn-sm-edit" onclick="quickMutationFromScan(\'MASUK\')">+ Barang Masuk</button>' +
+              '<button class="btn-sm-edit" onclick="quickMutationFromScan(\'KELUAR\')">- Barang Keluar</button>' +
+            '</div>';
+          state.lastScanned = p;
+        } else {
+          showToast((res && res.message) || 'Barcode tidak ditemukan.', 'err');
+          box.className = 'empty-state';
+          box.innerHTML = 'Barcode <strong>' + escHtml(code) + '</strong> belum terdaftar. <br><button class="btn-sm-edit" style="margin-top:8px;" data-new-bc="' + escHtml(code) + '" onclick="openProductModal({ barcode: this.getAttribute(\'data-new-bc\') })">+ Daftarkan Produk Baru</button>';
+        }
+        inputEl.value = '';
+        inputEl.focus();
+      });
+    }
+
+    function editScannedItem() {
+      if (state.lastScanned) openProductModal(state.lastScanned);
+    }
+
+    function quickMutationFromScan(tipe) {
+      if (!state.lastScanned) return;
+      var p = state.lastScanned;
+      openMutationModal({
+        tanggal: todayDisplay(),
+        tipe: tipe,
+        barcode: p.barcode,
+        nama: p.nama,
+        jumlah: 1,
+        kemasan: p.nilaiKemasan + ' ' + p.satuanKemasan,
+        hargaTotal: tipe === 'KELUAR' ? p.hargaList : 0,
+        keterangan: ''
+      });
+    }
+
+    function toggleCameraScanner() {
+      if (state.cameraActive) {
+        stopCameraScanner();
+        return;
+      }
+      var readerEl = document.getElementById('cameraReader');
+      if (typeof Html5Qrcode === 'undefined') {
+        showToast('Library kamera scanner belum termuat.', 'err');
+        return;
+      }
+      readerEl.style.display = 'block';
+      state.cameraScanner = new Html5Qrcode('cameraReader');
+      state.cameraScanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 110 } },
+        function(decodedText) {
+          stopCameraScanner();
+          triggerBarcodeLookup(decodedText);
+        },
+        function() {}
+      ).then(function() {
+        state.cameraActive = true;
+        document.getElementById('camBtnTitle').textContent = 'Tutup Kamera Scan';
+      }).catch(function(err) {
+        readerEl.style.display = 'none';
+        showToast('Kamera tidak tersedia: ' + err, 'err');
+      });
+    }
+
+    function stopCameraScanner() {
+      if (state.cameraScanner && state.cameraActive) {
+        state.cameraScanner.stop().then(function() {
+          state.cameraActive = false;
+          document.getElementById('cameraReader').style.display = 'none';
+          document.getElementById('camBtnTitle').textContent = 'Buka Kamera Scan';
+        }).catch(function() {});
+      }
+    }
+
+    /* ============ TAB 2: RAK 1-11 (7 LANTAI) ============ */
+    function loadRackSummary() {
+      callServer('getRackSummary', [state.token], function(res) {
+        if (res && res.success) {
+          state.racksSummary = res.racks || [];
+          renderRackTiles();
+        }
+      });
+    }
+
+    function renderRackTiles() {
+      var romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+      var map = {};
+      for (var i = 0; i < state.racksSummary.length; i++) {
+        map[state.racksSummary[i].rak] = state.racksSummary[i];
+      }
+      var html = '';
+      for (var j = 0; j < romans.length; j++) {
+        var r = romans[j];
+        var info = map[r] || { skuCount: 0, totalStok: 0 };
+        var act = state.selectedRak === r ? ' active' : '';
+        html += '<div class="rack-tile' + act + '" onclick="selectRak(\'' + r + '\')">' +
+          '<div class="rack-tile-num">RAK ' + r + '</div>' +
+          '<div class="rack-tile-meta">' + info.skuCount + ' SKU &bull; Stok ' + info.totalStok + '</div>' +
+          '</div>';
+      }
+      document.getElementById('rackTilesContainer').innerHTML = html;
+    }
+
+    function buildFloorPills() {
+      var html = '<button class="floor-pill' + (state.selectedLantai === 'ALL' ? ' active' : '') + '" onclick="selectLantai(\'ALL\')">Semua Lantai</button>';
+      for (var f = 1; f <= 7; f++) {
+        var act = String(state.selectedLantai) === String(f) ? ' active' : '';
+        html += '<button class="floor-pill' + act + '" onclick="selectLantai(\'' + f + '\')">Lantai ' + f + '</button>';
+      }
+      document.getElementById('floorPillsContainer').innerHTML = html;
+    }
+
+    function selectRak(rak) {
+      state.selectedRak = rak;
+      renderRackTiles();
+      loadRackItems();
+    }
+
+    function selectLantai(lt) {
+      state.selectedLantai = lt;
+      buildFloorPills();
+      loadRackItems();
+    }
+
+    function loadRackItems() {
+      callServer('getProducts', [state.token, { rak: state.selectedRak, lantai: state.selectedLantai, offset: 0, limit: 200 }], function(res) {
+        if (!res || !res.success) return;
+        state.rakItems = res.items || [];
+        var tbody = document.getElementById('rakTableBody');
+        var totalStok = 0;
+        if (!state.rakItems.length) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada produk di Rak ' + escHtml(state.selectedRak) + (state.selectedLantai === 'ALL' ? '' : ' Lantai ' + escHtml(state.selectedLantai)) + '.</td></tr>';
+        } else {
+          var html = '';
+          for (var i = 0; i < state.rakItems.length; i++) {
+            var p = state.rakItems[i];
+            totalStok += Number(p.sisaStok) || 0;
+            html += '<tr>' +
+              '<td><span class="badge badge-gold">Rak ' + escHtml(p.rak) + ' - Lt ' + escHtml(p.lantai) + '</span></td>' +
+              '<td>' + escHtml(p.barcode || '-') + '</td>' +
+              '<td><strong>' + escHtml(p.nama) + '</strong></td>' +
+              '<td>' + escHtml(p.nilaiKemasan + ' ' + p.satuanKemasan) + '</td>' +
+              '<td class="num-col">' + escHtml(p.qty) + '</td>' +
+              '<td class="num-col"><strong>' + escHtml(p.sisaStok) + '</strong></td>' +
+              '<td>' + escHtml(p.catatanStok || '-') + '</td>' +
+              '<td><button class="btn-sm-edit" data-edit-rak="' + escHtml(p.id) + '" onclick="editProductById(this.getAttribute(\'data-edit-rak\'))">Edit</button></td>' +
+              '</tr>';
+          }
+          tbody.innerHTML = html;
+        }
+        document.getElementById('rakAutoSumSku').textContent = state.rakItems.length + ' Produk';
+        document.getElementById('rakAutoSumStok').textContent = 'Total Stok: ' + totalStok;
+      });
+    }
+
+    /* ============ TAB 3: DATA PRODUK & HARGA + PASTA KOSONG ============ */
+    function loadPriceProducts(reset) {
+      if (reset) {
+        state.priceOffset = 0;
+        state.priceProducts = [];
+      }
+      var q = String(document.getElementById('produkSearchInput').value || '').trim();
+      callServer('getProducts', [state.token, { search: q, offset: state.priceOffset, limit: 25 }], function(res) {
+        if (!res || !res.success) return;
+        var incoming = res.items || [];
+        state.priceProducts = reset ? incoming : state.priceProducts.concat(incoming);
+        state.priceOffset = state.priceProducts.length;
+        renderPriceProductsTable();
+        document.getElementById('produkTotalBadge').textContent = String(res.totalFiltered || state.priceProducts.length) + ' produk';
+        document.getElementById('produkLoadMoreWrap').style.display = res.hasMore ? 'block' : 'none';
+      });
+    }
+
+    function renderPriceProductsTable() {
+      var tbody = document.getElementById('produkTableBody');
+      if (!state.priceProducts.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Tidak ada data produk.</td></tr>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < state.priceProducts.length; i++) {
+        var p = state.priceProducts[i];
+        html += '<tr>' +
+          '<td><strong>' + escHtml(p.nama) + '</strong><div style="font-size:11.5px;color:var(--text-muted);">Rak ' + escHtml(p.rak) + ' Lt ' + escHtml(p.lantai) + ' &bull; ' + escHtml(p.barcode) + '</div></td>' +
+          '<td class="num-col">' + escHtml(p.qty) + '</td>' +
+          '<td class="num-col"><strong>' + escHtml(p.sisaStok) + '</strong></td>' +
+          '<td>' + escHtml(p.nilaiKemasan + ' ' + p.satuanKemasan) + '</td>' +
+          '<td class="num-col">' + escHtml(fmtRp(p.hargaList)) + '</td>' +
+          '<td class="num-col">' + escHtml(fmtRp(p.hargaPpn)) + '</td>' +
+          '<td class="num-col">' + escHtml(fmtRp(p.hargaDisc1)) + '</td>' +
+          '<td class="num-col"><strong>' + escHtml(fmtRp(p.hargaDisc2)) + '</strong></td>' +
+          '<td><button class="btn-sm-edit" data-edit-p="' + escHtml(p.id) + '" onclick="editProductById(this.getAttribute(\'data-edit-p\'))">Edit</button></td>' +
+          '</tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    function findProductInMemory(id) {
+      var lists = [state.products, state.priceProducts, state.rakItems];
+      for (var l = 0; l < lists.length; l++) {
+        for (var i = 0; i < lists[l].length; i++) {
+          if (lists[l][i].id === id) return lists[l][i];
+        }
+      }
+      return null;
+    }
+
+    function editProductById(id) {
+      var item = findProductInMemory(id);
+      if (item) openProductModal(item);
+    }
+
+    function openProductModal(item) {
+      var isEdit = Boolean(item && item.id);
+      document.getElementById('productModalTitle').textContent = isEdit ? 'Edit Data Produk' : 'Tambah Produk Baru';
+      document.getElementById('prodId').value = isEdit ? item.id : '';
+      document.getElementById('prodBarcode').value = (item && item.barcode) || '';
+      document.getElementById('prodNama').value = (item && item.nama) || '';
+      document.getElementById('prodRak').value = (item && item.rak) || 'I';
+      document.getElementById('prodLantai').value = String((item && item.lantai) || 1);
+      document.getElementById('prodCatatan').value = (item && item.catatanStok) || '';
+      document.getElementById('prodQty').value = (item && item.qty !== undefined) ? item.qty : 0;
+      document.getElementById('prodSisa').value = (item && item.sisaStok !== undefined) ? item.sisaStok : 0;
+      document.getElementById('prodNilaiKem').value = (item && item.nilaiKemasan) || '';
+      document.getElementById('prodSatuanKem').value = (item && item.satuanKemasan) || 'Kilogram';
+      document.getElementById('prodHargaList').value = (item && item.hargaList) || 0;
+      document.getElementById('prodHargaPpn').value = (item && item.hargaPpn) || 0;
+      document.getElementById('prodHargaDisc1').value = (item && item.hargaDisc1) || 0;
+      document.getElementById('prodHargaDisc2').value = (item && item.hargaDisc2) || 0;
+      openModal('productModal');
+    }
+
+    function autoCalcProductPrices() {
+      var listVal = Number(document.getElementById('prodHargaList').value) || 0;
+      var ppn = Math.round(listVal / 1.11);
+      var d1 = Math.round(ppn * 0.925);
+      var d2 = Math.round(d1 * 0.975);
+      document.getElementById('prodHargaPpn').value = ppn;
+      document.getElementById('prodHargaDisc1').value = d1;
+      document.getElementById('prodHargaDisc2').value = d2;
+    }
+
+    function submitProductForm() {
+      var payload = {
+        id: String(document.getElementById('prodId').value || '').trim(),
+        barcode: String(document.getElementById('prodBarcode').value || '').trim(),
+        nama: String(document.getElementById('prodNama').value || '').trim(),
+        rak: String(document.getElementById('prodRak').value || 'I'),
+        lantai: Number(document.getElementById('prodLantai').value) || 1,
+        catatanStok: String(document.getElementById('prodCatatan').value || '').trim(),
+        qty: Number(document.getElementById('prodQty').value) || 0,
+        sisaStok: Number(document.getElementById('prodSisa').value) || 0,
+        nilaiKemasan: String(document.getElementById('prodNilaiKem').value || '').trim(),
+        satuanKemasan: String(document.getElementById('prodSatuanKem').value || 'Kilogram'),
+        hargaList: Number(document.getElementById('prodHargaList').value) || 0,
+        hargaPpn: Number(document.getElementById('prodHargaPpn').value) || 0,
+        hargaDisc1: Number(document.getElementById('prodHargaDisc1').value) || 0,
+        hargaDisc2: Number(document.getElementById('prodHargaDisc2').value) || 0
+      };
+      if (!payload.nama) {
+        showToast('Nama produk wajib diisi.', 'err');
+        return;
+      }
+      var btn = document.getElementById('btnSaveProd');
+      btn.disabled = true;
+      callServer('saveProduct', [state.token, payload], function(res) {
+        btn.disabled = false;
+        if (res && res.success) {
+          closeModal('productModal');
+          showToast(res.message || 'Produk tersimpan.', 'ok');
+          // Optimistic UI update lokal langsung
+          if (res.item) upsertProductLocally(res.item);
+          refreshCurrentTab();
+        } else {
+          showToast((res && res.message) || 'Gagal menyimpan produk.', 'err');
+        }
+      }, function() { btn.disabled = false; });
+    }
+
+    function upsertProductLocally(item) {
+      var replaced = false;
+      for (var i = 0; i < state.products.length; i++) {
+        if (state.products[i].id === item.id) {
+          state.products[i] = item;
+          replaced = true;
+          break;
+        }
+      }
+      if (!replaced) state.products.unshift(item);
+      renderStokTable();
+    }
+
+    function loadPastaKosong() {
+      callServer('getPastaKosong', [state.token], function(res) {
+        if (!res || !res.success) return;
+        state.pastaItems = res.items || [];
+        var tbody = document.getElementById('pastaTableBody');
+        if (!state.pastaItems.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Semua pasta tersedia.</td></tr>';
+          return;
+        }
+        var html = '';
+        for (var i = 0; i < state.pastaItems.length; i++) {
+          var p = state.pastaItems[i];
+          var cls = p.status === 'TERSEDIA' ? 'badge-ok' : 'badge-low';
+          html += '<tr>' +
+            '<td>' + escHtml(p.id) + '</td>' +
+            '<td><strong>' + escHtml(p.kodePasta) + '</strong></td>' +
+            '<td><span class="badge ' + cls + '">' + escHtml(p.status) + '</span></td>' +
+            '<td>' + escHtml(p.tanggalLapor) + '</td>' +
+            '<td><button class="btn-sm-edit" data-idx="' + i + '" onclick="openPastaModal(state.pastaItems[Number(this.getAttribute(\'data-idx\'))])">Edit</button></td>' +
+            '</tr>';
+        }
+        tbody.innerHTML = html;
+      });
+    }
+
+    function openPastaModal(item) {
+      document.getElementById('pastaModalTitle').textContent = item ? 'Edit Data Pasta' : 'Tambah Pasta Kosong';
+      document.getElementById('pstId').value = item ? item.id : '';
+      document.getElementById('pstKode').value = item ? item.kodePasta : '';
+      document.getElementById('pstStatus').value = item ? item.status : 'KOSONG';
+      document.getElementById('pstTanggal').value = item ? item.tanggalLapor : todayDisplay();
+      openModal('pastaModal');
+    }
+
+    function submitPastaForm() {
+      var payload = {
+        id: String(document.getElementById('pstId').value || '').trim(),
+        kodePasta: String(document.getElementById('pstKode').value || '').trim(),
+        status: String(document.getElementById('pstStatus').value || 'KOSONG'),
+        tanggalLapor: String(document.getElementById('pstTanggal').value || todayDisplay()).trim()
+      };
+      callServer('savePastaKosong', [state.token, payload], function(res) {
+        if (res && res.success) {
+          closeModal('pastaModal');
+          showToast(res.message, 'ok');
+          loadPastaKosong();
+        } else {
+          showToast((res && res.message) || 'Gagal simpan pasta.', 'err');
+        }
+      });
+    }
+
+    /* ============ TAB 4: KATALOG & UPLOAD DRIVE (FORMAT LH3) ============ */
+    function loadCatalog(reset) {
+      if (reset) {
+        state.katOffset = 0;
+        state.catalogs = [];
+      }
+      var q = String(document.getElementById('katalogSearchInput').value || '').trim();
+      callServer('getCatalogList', [state.token, { search: q, offset: state.katOffset, limit: 18 }], function(res) {
+        if (!res || !res.success) return;
+        var incoming = res.items || [];
+        state.catalogs = reset ? incoming : state.catalogs.concat(incoming);
+        state.katOffset = state.catalogs.length;
+        renderCatalogGrid();
+        document.getElementById('katalogCountBadge').textContent = String(res.totalFiltered || state.catalogs.length) + ' katalog';
+        document.getElementById('katalogLoadMoreWrap').style.display = res.hasMore ? 'block' : 'none';
+      });
+    }
+
+    function renderCatalogGrid() {
+      var grid = document.getElementById('catalogGridContainer');
+      if (!state.catalogs.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Belum ada item katalog. Klik "Tambah Katalog" untuk mengunggah foto/video produk.</div>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < state.catalogs.length; i++) {
+        var c = state.catalogs[i];
+        var mediaHtml = '';
+        if (c.mediaUrl && c.mediaTipe === 'VIDEO') {
+          mediaHtml = '<div style="text-align:center; padding:16px; color:var(--charcoal);"><div style="font-size:34px;">&#9654;</div><div style="font-size:12px; font-weight:600; margin-top:6px;">Klik untuk Putar Video</div></div>';
+        } else if (c.mediaUrl) {
+          mediaHtml = '<img src="' + escHtml(c.mediaUrl) + '" alt="' + escHtml(c.nama) + '" loading="lazy" referrerpolicy="no-referrer">';
+        } else {
+          mediaHtml = '<div style="font-size:12px; color:var(--text-muted); font-weight:600;">Belum Ada Foto/Video</div>';
+        }
+        html += '<div class="catalog-card">' +
+          '<div class="catalog-media-box" data-idx="' + i + '" onclick="openCatalogDetail(Number(this.getAttribute(\'data-idx\')))">' +
+            '<span class="catalog-media-badge">' + escHtml(c.kategori || 'PRODUK') + '</span>' +
+            mediaHtml +
+          '</div>' +
+          '<div class="catalog-body">' +
+            '<div class="catalog-title">' + escHtml(c.nama) + '</div>' +
+            '<div style="font-size:12px; color:var(--text-muted);">Warna: ' + escHtml(c.kodeWarna) + ' &bull; ' + escHtml(c.kemasan) + '</div>' +
+            '<div class="catalog-price">' + escHtml(fmtRp(c.hargaTampil)) + '</div>' +
+            '<div class="catalog-specs-mini">' +
+              '<strong>Daya Sebar:</strong> ' + escHtml(c.dayaSebar) + '<br>' +
+              '<strong>Pengencer:</strong> ' + escHtml(c.pengencer) +
+            '</div>' +
+            '<div class="catalog-actions">' +
+              '<button class="btn-ghost-pill" style="padding:7px 14px; font-size:12px;" data-idx="' + i + '" onclick="openCatalogDetail(Number(this.getAttribute(\'data-idx\')))">Spesifikasi</button>' +
+              '<button class="btn-sm-edit" data-idx="' + i + '" onclick="openCatalogModal(state.catalogs[Number(this.getAttribute(\'data-idx\'))])">Edit</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }
+      grid.innerHTML = html;
+    }
+
+    function openCatalogDetail(idx) {
+      var c = state.catalogs[idx];
+      if (!c) return;
+      document.getElementById('detKatTitle').textContent = c.nama;
+      var mediaPart = '';
+      if (c.mediaUrl && c.mediaTipe === 'VIDEO') {
+        mediaPart = '<iframe src="' + escHtml(c.mediaUrl) + '" style="width:100%; height:300px; border:none; border-radius:16px; margin-bottom:16px;" allow="autoplay"></iframe>';
+      } else if (c.mediaUrl) {
+        mediaPart = '<img src="' + escHtml(c.mediaUrl) + '" referrerpolicy="no-referrer" style="width:100%; max-height:300px; object-fit:cover; border-radius:16px; margin-bottom:16px;">';
+      }
+      document.getElementById('detKatBody').innerHTML =
+        mediaPart +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">' +
+          '<span class="badge badge-gold">' + escHtml(c.kategori) + '</span>' +
+          '<strong style="font-size:20px; color:var(--charcoal);">' + escHtml(fmtRp(c.hargaTampil)) + '</strong>' +
+        '</div>' +
+        '<div class="table-wrap" style="margin-bottom:14px;"><table style="min-width:100%;"><tbody>' +
+          '<tr><td style="width:38%;color:var(--text-muted);">Kode Warna</td><td><strong>' + escHtml(c.kodeWarna) + '</strong></td></tr>' +
+          '<tr><td style="color:var(--text-muted);">Kemasan</td><td>' + escHtml(c.kemasan) + '</td></tr>' +
+          '<tr><td style="color:var(--text-muted);">Daya Sebar</td><td>' + escHtml(c.dayaSebar) + '</td></tr>' +
+          '<tr><td style="color:var(--text-muted);">Pengencer</td><td>' + escHtml(c.pengencer) + '</td></tr>' +
+          '<tr><td style="color:var(--text-muted);">Waktu Kering</td><td>' + escHtml(c.waktuKering) + '</td></tr>' +
+          '<tr><td style="color:var(--text-muted);">Aplikasi Permukaan</td><td>' + escHtml(c.aplikasiPermukaan) + '</td></tr>' +
+        '</tbody></table></div>' +
+        '<div style="font-size:13.5px; line-height:1.6; color:var(--text-main);">' + escHtml(c.deskripsi || 'Tidak ada deskripsi tambahan.') + '</div>';
+      openModal('catalogDetailModal');
+    }
+
+    function openCatalogModal(item) {
+      document.getElementById('catalogModalTitle').textContent = item ? 'Edit Katalog Produk' : 'Tambah Katalog Produk';
+      document.getElementById('katId').value = item ? item.id : '';
+      document.getElementById('katNama').value = item ? item.nama : '';
+      document.getElementById('katKategori').value = item ? item.kategori : '';
+      document.getElementById('katWarna').value = item ? item.kodeWarna : '';
+      document.getElementById('katKemasan').value = item ? item.kemasan : '';
+      document.getElementById('katHarga').value = item ? item.hargaTampil : 0;
+      document.getElementById('katDayaSebar').value = item ? item.dayaSebar : '';
+      document.getElementById('katPengencer').value = item ? item.pengencer : '';
+      document.getElementById('katWaktuKering').value = item ? item.waktuKering : '';
+      document.getElementById('katAplikasi').value = item ? item.aplikasiPermukaan : '';
+      document.getElementById('katDeskripsi').value = item ? item.deskripsi : '';
+      document.getElementById('katDriveFileId').value = item ? item.driveFileId : '';
+      document.getElementById('katMediaTipe').value = item ? item.mediaTipe : 'FOTO';
+      document.getElementById('katMediaUrl').value = item ? item.mediaUrl : '';
+      document.getElementById('katFileInput').value = '';
+      document.getElementById('katUploadStatus').textContent = (item && item.mediaUrl) ? ('Media tersimpan: ' + item.mediaUrl) : '';
+
+      var prev = document.getElementById('katMediaPreview');
+      if (item && item.mediaUrl && item.mediaTipe === 'FOTO') {
+        prev.style.display = 'flex';
+        prev.innerHTML = '<img src="' + escHtml(item.mediaUrl) + '" referrerpolicy="no-referrer">';
+      } else {
+        prev.style.display = 'none';
+        prev.innerHTML = '';
+      }
+      openModal('catalogModal');
+    }
+
+    function previewSelectedMedia() {
+      var input = document.getElementById('katFileInput');
+      var prev = document.getElementById('katMediaPreview');
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      var url = URL.createObjectURL(file);
+      prev.style.display = 'flex';
+      if (file.type.indexOf('video/') === 0) {
+        prev.innerHTML = '<video src="' + url + '" controls></video>';
+      } else {
+        prev.innerHTML = '<img src="' + url + '">';
+      }
+    }
+
+    function compressImageToBase64(file, callback) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var img = new Image();
+        img.onload = function() {
+          var maxW = 1280;
+          var w = img.width;
+          var h = img.height;
+          if (w > maxW) {
+            h = Math.round(h * (maxW / w));
+            w = maxW;
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          callback(dataUrl.split(',')[1], 'image/jpeg');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function submitCatalogForm() {
+      var btn = document.getElementById('btnSaveKat');
+      var fileInput = document.getElementById('katFileInput');
+      var statusEl = document.getElementById('katUploadStatus');
+      var file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
+      btn.disabled = true;
+
+      if (file) {
+        if (file.type.indexOf('video/') === 0 && file.size > 15 * 1024 * 1024) {
+          btn.disabled = false;
+          showToast('Ukuran video maksimal 15 MB agar stabil diunggah ke Google Drive.', 'err');
+          return;
+        }
+        statusEl.textContent = 'Mengunggah media ke Google Drive...';
+        if (file.type.indexOf('image/') === 0) {
+          compressImageToBase64(file, function(b64, mime) {
+            uploadThenSaveCatalog(b64, mime, file.name, btn, statusEl);
+          });
+        } else {
+          var rd = new FileReader();
+          rd.onload = function(ev) {
+            var b64 = String(ev.target.result).split(',')[1];
+            uploadThenSaveCatalog(b64, file.type, file.name, btn, statusEl);
+          };
+          rd.readAsDataURL(file);
+        }
+      } else {
+        finalizeCatalogSave(btn);
+      }
+    }
+
+    function uploadThenSaveCatalog(base64, mimeType, fileName, btn, statusEl) {
+      callServer('uploadMediaToDrive', [state.token, { base64: base64, mimeType: mimeType, fileName: fileName }], function(upRes) {
+        if (upRes && upRes.success) {
+          document.getElementById('katDriveFileId').value = upRes.fileId;
+          document.getElementById('katMediaTipe').value = upRes.mediaTipe;
+          document.getElementById('katMediaUrl').value = upRes.mediaUrl;
+          statusEl.textContent = 'Upload sukses! Link: ' + upRes.mediaUrl;
+          finalizeCatalogSave(btn);
+        } else {
+          btn.disabled = false;
+          statusEl.textContent = '';
+          showToast((upRes && upRes.message) || 'Gagal upload ke Google Drive.', 'err');
+        }
+      }, function() {
+        btn.disabled = false;
+        statusEl.textContent = '';
+      });
+    }
+
+    function finalizeCatalogSave(btn) {
+      var payload = {
+        id: String(document.getElementById('katId').value || '').trim(),
+        nama: String(document.getElementById('katNama').value || '').trim(),
+        kategori: String(document.getElementById('katKategori').value || 'Cat Dekoratif').trim(),
+        kodeWarna: String(document.getElementById('katWarna').value || '-').trim(),
+        kemasan: String(document.getElementById('katKemasan').value || '-').trim(),
+        hargaTampil: Number(document.getElementById('katHarga').value) || 0,
+        dayaSebar: String(document.getElementById('katDayaSebar').value || '-').trim(),
+        pengencer: String(document.getElementById('katPengencer').value || '-').trim(),
+        waktuKering: String(document.getElementById('katWaktuKering').value || '-').trim(),
+        aplikasiPermukaan: String(document.getElementById('katAplikasi').value || '-').trim(),
+        deskripsi: String(document.getElementById('katDeskripsi').value || '').trim(),
+        mediaTipe: String(document.getElementById('katMediaTipe').value || 'FOTO'),
+        driveFileId: String(document.getElementById('katDriveFileId').value || ''),
+        mediaUrl: String(document.getElementById('katMediaUrl').value || '')
+      };
+      callServer('saveCatalog', [state.token, payload], function(res) {
+        btn.disabled = false;
+        if (res && res.success) {
+          closeModal('catalogModal');
+          showToast(res.message || 'Katalog tersimpan.', 'ok');
+          loadCatalog(true);
+        } else {
+          showToast((res && res.message) || 'Gagal simpan katalog.', 'err');
+        }
+      }, function() { btn.disabled = false; });
+    }
+
+    /* ============ TAB 5: KALKULATOR DISCOUNT & PENJUMLAHAN OTOMATIS ============ */
+    function populateCalcSelect() {
+      var sel = document.getElementById('calcProductSelect');
+      var html = '<option value="">-- Input Manual --</option>';
+      var src = state.products.length ? state.products : state.priceProducts;
+      for (var i = 0; i < src.length; i++) {
+        var p = src[i];
+        html += '<option value="' + escHtml(p.id) + '">' + escHtml(p.nama) + ' (' + escHtml(fmtRp(p.hargaList)) + ')</option>';
+      }
+      sel.innerHTML = html;
+    }
+
+    function applyCalcProductPreset() {
+      var id = document.getElementById('calcProductSelect').value;
+      if (!id) return;
+      var p = findProductInMemory(id);
+      if (!p) return;
+      document.getElementById('calcItemName').value = p.nama;
+      document.getElementById('calcHargaList').value = p.hargaList;
+      recalcPreview();
+    }
+
+    function computeDiscountNumbers() {
+      var list = Number(document.getElementById('calcHargaList').value) || 0;
+      var qty = Math.max(1, Number(document.getElementById('calcQty').value) || 1);
+      var mode = document.getElementById('calcPpnMode').value;
+      var d1 = Number(document.getElementById('calcDisc1').value) || 0;
+      var d2 = Number(document.getElementById('calcDisc2').value) || 0;
+
+      var basePpn = list;
+      if (mode === 'div111') basePpn = list / 1.11;
+      else if (mode === 'add11') basePpn = list * 1.11;
+
+      var afterD1 = basePpn * (1 - d1 / 100);
+      var nettUnit = afterD1 * (1 - d2 / 100);
+      var bruto = list * qty;
+      var subtotal = nettUnit * qty;
+      var saving = Math.max(0, bruto - subtotal);
+
+      return {
+        list: Math.round(list),
+        qty: qty,
+        mode: mode,
+        d1: d1,
+        d2: d2,
+        basePpn: Math.round(basePpn),
+        afterD1: Math.round(afterD1),
+        nettUnit: Math.round(nettUnit),
+        bruto: Math.round(bruto),
+        subtotal: Math.round(subtotal),
+        saving: Math.round(saving)
+      };
+    }
+
+    function recalcPreview() {
+      var c = computeDiscountNumbers();
+      document.getElementById('prevAfterPpn').textContent = fmtRp(c.basePpn);
+      document.getElementById('prevAfterD1').textContent = fmtRp(c.afterD1);
+      document.getElementById('prevNettUnit').textContent = fmtRp(c.nettUnit);
+      document.getElementById('prevSaving').textContent = fmtRp(c.saving);
+      document.getElementById('prevSubtotal').textContent = fmtRp(c.subtotal);
+    }
+
+    function addCalcToCart() {
+      var name = String(document.getElementById('calcItemName').value || '').trim();
+      if (!name) return;
+      var c = computeDiscountNumbers();
+      c.name = name;
+
+      if (state.calcEditIdx >= 0) {
+        state.calcCart[state.calcEditIdx] = c;
+        state.calcEditIdx = -1;
+        document.getElementById('calcSubmitLabel').textContent = 'Tambah ke Daftar Hitung';
+        showToast('Item simulasi diperbarui.', 'ok');
+      } else {
+        state.calcCart.push(c);
+        showToast('Item masuk keranjang simulasi.', 'ok');
+      }
+      renderCalcCart();
+    }
+
+    function editCalcCartItem(idx) {
+      var c = state.calcCart[idx];
+      if (!c) return;
+      state.calcEditIdx = idx;
+      document.getElementById('calcItemName').value = c.name;
+      document.getElementById('calcHargaList').value = c.list;
+      document.getElementById('calcQty').value = c.qty;
+      document.getElementById('calcPpnMode').value = c.mode;
+      document.getElementById('calcDisc1').value = c.d1;
+      document.getElementById('calcDisc2').value = c.d2;
+      document.getElementById('calcSubmitLabel').textContent = 'Simpan Perubahan Item';
+      recalcPreview();
+    }
+
+    function removeCalcCartItem(idx) {
+      state.calcCart.splice(idx, 1);
+      renderCalcCart();
+    }
+
+    function clearCalcCart() {
+      state.calcCart = [];
+      state.calcEditIdx = -1;
+      document.getElementById('calcSubmitLabel').textContent = 'Tambah ke Daftar Hitung';
+      renderCalcCart();
+    }
+
+    function renderCalcCart() {
+      var tbody = document.getElementById('calcCartBody');
+      var totalBruto = 0;
+      var totalGrand = 0;
+      if (!state.calcCart.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Keranjang simulasi kosong.</td></tr>';
+      } else {
+        var html = '';
+        for (var i = 0; i < state.calcCart.length; i++) {
+          var c = state.calcCart[i];
+          totalBruto += c.bruto;
+          totalGrand += c.subtotal;
+          html += '<tr>' +
+            '<td><strong>' + escHtml(c.name) + '</strong><div style="font-size:11px;color:var(--text-muted);">Disc ' + c.d1 + '% + ' + c.d2 + '%</div></td>' +
+            '<td class="num-col">' + escHtml(c.qty) + '</td>' +
+            '<td class="num-col">' + escHtml(fmtRp(c.nettUnit)) + '</td>' +
+            '<td class="num-col"><strong>' + escHtml(fmtRp(c.subtotal)) + '</strong></td>' +
+            '<td style="white-space:nowrap;">' +
+              '<button class="btn-sm-edit" onclick="editCalcCartItem(' + i + ')">Edit</button> ' +
+              '<button class="btn-sm-edit" onclick="removeCalcCartItem(' + i + ')">&times;</button>' +
+            '</td>' +
+          '</tr>';
+        }
+        tbody.innerHTML = html;
+      }
+      document.getElementById('calcCartCount').textContent = state.calcCart.length + ' item';
+      document.getElementById('cartTotalBruto').textContent = fmtRp(totalBruto);
+      document.getElementById('cartTotalDisc').textContent = fmtRp(Math.max(0, totalBruto - totalGrand));
+      document.getElementById('cartGrandTotal').textContent = fmtRp(totalGrand);
+    }
+
+    /* ============ TAB 6: BARANG MASUK & KELUAR ============ */
+    function loadMutations(reset) {
+      if (reset) {
+        state.mutOffset = 0;
+        state.mutations = [];
+      }
+      var q = String(document.getElementById('mutasiSearchInput').value || '').trim();
+      var tipe = String(document.getElementById('mutasiTipeFilter').value || 'ALL');
+      callServer('getMutations', [state.token, { search: q, tipe: tipe, offset: state.mutOffset, limit: 25 }], function(res) {
+        if (!res || !res.success) return;
+        var incoming = res.items || [];
+        state.mutations = reset ? incoming : state.mutations.concat(incoming);
+        state.mutOffset = state.mutations.length;
+        renderMutationsTable();
+        if (res.summary) {
+          document.getElementById('sumMutasiIn').textContent = String(res.summary.totalInQty || 0);
+          document.getElementById('sumMutasiOut').textContent = String(res.summary.totalOutQty || 0);
+          document.getElementById('sumMutasiNominal').textContent = fmtRp(res.summary.totalNominalOut || 0);
+        }
+        document.getElementById('mutasiLoadMoreWrap').style.display = res.hasMore ? 'block' : 'none';
+      });
+    }
+
+    function renderMutationsTable() {
+      var tbody = document.getElementById('mutasiTableBody');
+      if (!state.mutations.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada riwayat mutasi barang.</td></tr>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < state.mutations.length; i++) {
+        var m = state.mutations[i];
+        var cls = m.tipe === 'MASUK' ? 'badge-ok' : 'badge-low';
+        html += '<tr>' +
+          '<td><strong>' + escHtml(m.tanggal) + '</strong><div style="font-size:11px;color:var(--text-muted);">' + escHtml(m.id) + '</div></td>' +
+          '<td><span class="badge ' + cls + '">' + escHtml(m.tipe) + '</span></td>' +
+          '<td><strong>' + escHtml(m.nama) + '</strong></td>' +
+          '<td class="num-col"><strong>' + escHtml(m.jumlah) + '</strong></td>' +
+          '<td>' + escHtml(m.kemasan || '-') + '</td>' +
+          '<td class="num-col">' + escHtml(fmtRp(m.hargaTotal)) + '</td>' +
+          '<td>' + escHtml(m.keterangan || '-') + '</td>' +
+          '<td><button class="btn-sm-edit" data-idx="' + i + '" onclick="openMutationModal(state.mutations[Number(this.getAttribute(\'data-idx\'))])">Edit</button></td>' +
+          '</tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    function openMutationModal(item) {
+      var isEdit = Boolean(item && item.id);
+      document.getElementById('mutationModalTitle').textContent = isEdit ? 'Edit Mutasi Barang' : 'Catat Barang Masuk / Keluar';
+      document.getElementById('mutId').value = isEdit ? item.id : '';
+      document.getElementById('mutTanggal').value = (item && item.tanggal) || todayDisplay();
+      document.getElementById('mutTipe').value = (item && item.tipe) || 'KELUAR';
+      document.getElementById('mutBarcode').value = (item && item.barcode) || '';
+      document.getElementById('mutNama').value = (item && item.nama) || '';
+      document.getElementById('mutJumlah').value = (item && item.jumlah) || 1;
+      document.getElementById('mutKemasan').value = (item && item.kemasan) || '';
+      document.getElementById('mutHarga').value = (item && item.hargaTotal) || 0;
+      document.getElementById('mutKet').value = (item && item.keterangan) || '';
+      openModal('mutationModal');
+    }
+
+    function submitMutationForm() {
+      var payload = {
+        id: String(document.getElementById('mutId').value || '').trim(),
+        tanggal: String(document.getElementById('mutTanggal').value || todayDisplay()).trim(),
+        tipe: String(document.getElementById('mutTipe').value || 'KELUAR'),
+        barcode: String(document.getElementById('mutBarcode').value || '').trim(),
+        nama: String(document.getElementById('mutNama').value || '').trim(),
+        jumlah: Number(document.getElementById('mutJumlah').value) || 1,
+        kemasan: String(document.getElementById('mutKemasan').value || '').trim(),
+        hargaTotal: Number(document.getElementById('mutHarga').value) || 0,
+        keterangan: String(document.getElementById('mutKet').value || '').trim()
+      };
+      var btn = document.getElementById('btnSaveMut');
+      btn.disabled = true;
+      callServer('saveMutation', [state.token, payload], function(res) {
+        btn.disabled = false;
+        if (res && res.success) {
+          closeModal('mutationModal');
+          showToast(res.message, 'ok');
+          loadMutations(true);
+        } else {
+          showToast((res && res.message) || 'Gagal simpan mutasi.', 'err');
+        }
+      }, function() { btn.disabled = false; });
+    }
+
+    /* ============ TAB 7 & 8: KAS & DANA OPERASIONAL ============ */
+    function loadLedger(mode, reset) {
+      var isKas = (mode === 'kas');
+      if (reset) {
+        if (isKas) { state.kasOffset = 0; state.kasItems = []; }
+        else { state.opsOffset = 0; state.opsItems = []; }
+      }
+      var q = String(document.getElementById(isKas ? 'kasSearchInput' : 'opsSearchInput').value || '').trim();
+      var fnName = isKas ? 'getCashList' : 'getOpsList';
+      var offset = isKas ? state.kasOffset : state.opsOffset;
+
+      callServer(fnName, [state.token, { search: q, offset: offset, limit: 25 }], function(res) {
+        if (!res || !res.success) return;
+        var incoming = res.items || [];
+        if (isKas) {
+          state.kasItems = reset ? incoming : state.kasItems.concat(incoming);
+          state.kasOffset = state.kasItems.length;
+          renderLedgerTable('kas');
+          document.getElementById('kasLoadMoreWrap').style.display = res.hasMore ? 'block' : 'none';
+          if (res.summary) {
+            document.getElementById('sumKasIn').textContent = fmtRp(res.summary.totalIn);
+            document.getElementById('sumKasOut').textContent = fmtRp(res.summary.totalOut);
+            document.getElementById('sumKasSaldo').textContent = fmtRp(res.summary.saldo);
+          }
+        } else {
+          state.opsItems = reset ? incoming : state.opsItems.concat(incoming);
+          state.opsOffset = state.opsItems.length;
+          renderLedgerTable('ops');
+          document.getElementById('opsLoadMoreWrap').style.display = res.hasMore ? 'block' : 'none';
+          if (res.summary) {
+            document.getElementById('sumOpsIn').textContent = fmtRp(res.summary.totalIn);
+            document.getElementById('sumOpsOut').textContent = fmtRp(res.summary.totalOut);
+            document.getElementById('sumOpsSaldo').textContent = fmtRp(res.summary.saldo);
+          }
+        }
+      });
+    }
+
+    function renderLedgerTable(mode) {
+      var isKas = (mode === 'kas');
+      var list = isKas ? state.kasItems : state.opsItems;
+      var tbody = document.getElementById(isKas ? 'kasTableBody' : 'opsTableBody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Belum ada transaksi tercatat.</td></tr>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        html += '<tr>' +
+          '<td><strong>' + escHtml(r.tanggal) + '</strong><div style="font-size:11px;color:var(--text-muted);">' + escHtml(r.id) + '</div></td>' +
+          '<td>' + escHtml(r.keterangan) + '</td>' +
+          '<td class="num-col" style="color:var(--success); font-weight:600;">' + (r.inVal > 0 ? escHtml(fmtRp(r.inVal)) : '-') + '</td>' +
+          '<td class="num-col" style="color:var(--danger); font-weight:600;">' + (r.outVal > 0 ? escHtml(fmtRp(r.outVal)) : '-') + '</td>' +
+          '<td><span class="badge badge-neutral">' + escHtml(r.modelPembayaran || '-') + '</span></td>' +
+          '<td>' + escHtml(r.remark || '-') + '</td>' +
+          '<td><button class="btn-sm-edit" data-mode="' + mode + '" data-idx="' + i + '" onclick="editLedgerRow(this.getAttribute(\'data-mode\'), Number(this.getAttribute(\'data-idx\')))">Edit</button></td>' +
+          '</tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    function editLedgerRow(mode, idx) {
+      var list = mode === 'kas' ? state.kasItems : state.opsItems;
+      if (list[idx]) openLedgerModal(mode, list[idx]);
+    }
+
+    function openLedgerModal(mode, item) {
+      var isKas = (mode === 'kas');
+      var isEdit = Boolean(item && item.id);
+      document.getElementById('ledMode').value = mode;
+      document.getElementById('ledId').value = isEdit ? item.id : '';
+      document.getElementById('ledgerModalTitle').textContent = (isEdit ? 'Edit ' : 'Tambah ') + (isKas ? 'Transaksi Kas' : 'Dana Operasional');
+      document.getElementById('ledTanggal').value = (item && item.tanggal) || todayDisplay();
+      document.getElementById('ledKet').value = (item && item.keterangan) || '';
+      document.getElementById('ledIn').value = (item && item.inVal) || 0;
+      document.getElementById('ledOut').value = (item && item.outVal) || 0;
+      document.getElementById('ledPayment').value = (item && item.modelPembayaran) || 'CASH';
+      document.getElementById('ledRemark').value = (item && item.remark) || '';
+      openModal('ledgerModal');
+    }
+
+    function submitLedgerForm() {
+      var mode = document.getElementById('ledMode').value;
+      var payload = {
+        id: String(document.getElementById('ledId').value || '').trim(),
+        tanggal: String(document.getElementById('ledTanggal').value || todayDisplay()).trim(),
+        keterangan: String(document.getElementById('ledKet').value || '').trim(),
+        inVal: Number(document.getElementById('ledIn').value) || 0,
+        outVal: Number(document.getElementById('ledOut').value) || 0,
+        modelPembayaran: String(document.getElementById('ledPayment').value || 'CASH').trim(),
+        remark: String(document.getElementById('ledRemark').value || '').trim()
+      };
+      var fnName = mode === 'kas' ? 'saveCash' : 'saveOps';
+      var btn = document.getElementById('btnSaveLed');
+      btn.disabled = true;
+
+      callServer(fnName, [state.token, payload], function(res) {
+        btn.disabled = false;
+        if (res && res.success) {
+          closeModal('ledgerModal');
+          showToast(res.message, 'ok');
+          loadLedger(mode, true);
+        } else {
+          showToast((res && res.message) || 'Gagal menyimpan transaksi.', 'err');
+        }
+      }, function() { btn.disabled = false; });
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
