@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#101216" />
+  <meta name="description" content="Cahaya Mega — The Paint Specialist. Sistem Inventaris Cat, Rak 1–11, In & Out, Dana Operasional, dan Katalog Digital." />
+  <title>Cahaya Mega — The Paint Specialist</title>
+
+  <!-- Favicon SVG Emas Metalik Ringan (Tanpa URL Eksternal) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23081221'/%3E%3Cpath d='M12 42 L20 35 L17 26 L26 23 L27 14 L36 16 L40 9 L45 17 L53 16 L50 26 L56 32 L48 39 L44 42 A14 14 0 0 0 20 42 Z' fill='%23e5c174'/%3E%3Crect x='12' y='47' width='40' height='3.5' rx='1.75' fill='%23c5ff2e'/%3E%3C/svg%3E" />
+
+  <!-- Font Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            canvas: '#101216',
+            surface: '#181c22',
+            limebrand: '#c5ff2e',
+            goldsoft: '#e5c174'
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="m-0 p-0 w-screen h-[100dvh] overflow-hidden bg-canvas text-slate-100 font-sans antialiased select-none">
+
+  <!-- ======================================================================
+       SPLASH LOADER MODERN (MUNCUL SAAT APPS SCRIPT MEMUAT)
+       ====================================================================== -->
+  <div id="splashLoader" class="fixed inset-0 z-30 flex flex-col items-center justify-center bg-[#070b11] px-6 transition-opacity duration-500">
+    <div class="w-full max-w-sm rounded-3xl border border-amber-200/15 bg-[#0c1422]/90 p-8 text-center shadow-2xl">
+      <!-- Emblem Logo Cahaya Mega -->
+      <svg class="mx-auto w-56 h-auto drop-shadow-xl" viewBox="0 0 360 228" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo Cahaya Mega The Paint Specialist">
+        <defs>
+          <linearGradient id="goldWrapHero" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fff2c6" />
+            <stop offset="35%" stop-color="#e5c174" />
+            <stop offset="70%" stop-color="#c3933f" />
+            <stop offset="100%" stop-color="#8b6220" />
+          </linearGradient>
+        </defs>
+        <path d="M84 128 L104 114 L96 92 L119 84 L120 60 L144 59 L154 37 L177 45 L180 24 L193 44 L217 37 L225 59 L248 61 L248 84 L270 93 L261 114 L280 128 L262 138 L248 138 A68 68 0 0 0 112 138 L98 138 Z" fill="url(#goldWrapHero)" />
+        <path d="M138 135 L222 135 C222 124, 212 120, 203 120 C200 107, 187 106, 184 118 L173 118 L160 82 L152 86 L163 118 L148 118 C143 106, 135 108, 138 135 Z" fill="url(#goldWrapHero)" />
+        <circle cx="212" cy="108" r="8" fill="url(#goldWrapHero)" />
+        <rect x="26" y="152" width="308" height="2.4" rx="1.2" fill="url(#goldWrapHero)" />
+        <text x="180" y="187" text-anchor="middle" fill="url(#goldWrapHero)" font-family="Inter, sans-serif" font-size="28" font-weight="800" letter-spacing="4.2">CAHAYA MEGA</text>
+        <text x="180" y="211" text-anchor="middle" fill="#d9b265" font-family="Inter, sans-serif" font-size="11" font-weight="600" letter-spacing="3.2">THE PAINT SPECIALIST</text>
+      </svg>
+
+      <!-- Progress Bar & Status -->
+      <div class="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+        <div id="loaderBar" class="h-full w-2/3 rounded-full bg-limebrand animate-pulse"></div>
+      </div>
+      <p id="loaderStatus" class="mt-3 text-xs font-medium tracking-wide text-slate-400">
+        Menghubungkan ke server Google Apps Script...
+      </p>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       PANEL KONFIGURASI (MUNCUL OTOMATIS JIKA URL /exec BELUM DIISI)
+       ====================================================================== -->
+  <main id="setupPanel" class="hidden fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-canvas p-5">
+    <div class="w-full max-w-xl rounded-3xl border border-white/10 bg-surface p-7 sm:p-8 shadow-2xl">
+      <div class="inline-flex items-center gap-2 rounded-full border border-limebrand/30 bg-limebrand/10 px-3.5 py-1 text-[11px] font-bold tracking-wider text-limebrand">
+        <span class="h-2 w-2 rounded-full bg-limebrand"></span>
+        <span>VERCEL &amp; GITHUB WRAPPER</span>
+      </div>
+
+      <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-white">
+        Hubungkan URL Web App Apps Script
+      </h1>
+      <p class="mt-2 text-sm leading-relaxed text-slate-400">
+        File pembungkus ini siap di-deploy ke <strong class="text-slate-200">GitHub &amp; Vercel</strong> (rename menjadi <code class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-limebrand">index.html</code> di repository Anda). Masukkan URL <code class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-limebrand">/exec</code> hasil Deploy Web App dari proyek <code class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-amber-300">penghubung.gs</code> Anda.
+      </p>
+
+      <!-- Form Uji Cepat URL Langsung di Browser -->
+      <form id="quickUrlForm" class="mt-6 space-y-4" onsubmit="event.preventDefault(); applyQuickUrl();">
+        <div>
+          <label for="quickGasUrl" class="block text-xs font-semibold text-slate-300 mb-2">
+            URL Web App Google Apps Script (berakhiran /exec)
+          </label>
+          <input
+            id="quickGasUrl"
+            type="url"
+            placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+            class="w-full rounded-xl border border-white/10 bg-[#101318] px-4 py-3 font-mono text-xs text-white placeholder-slate-500 focus:border-limebrand focus:outline-none focus:ring-2 focus:ring-limebrand/20"
+            required
+          />
+        </div>
+        <div id="quickUrlError" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-300"></div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="submit" class="rounded-full bg-limebrand px-6 py-2.5 text-xs font-bold text-[#101216] shadow-lg transition hover:brightness-105 cursor-pointer">
+            Buka Aplikasi Sekarang
+          </button>
+          <button type="button" onclick="resetSavedUrl()" class="rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10 cursor-pointer">
+            Reset URL Tersimpan
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-6 rounded-2xl border border-white/10 bg-[#11151b] p-4 text-xs leading-relaxed text-slate-400">
+        <div class="font-semibold text-slate-200 mb-1.5">Agar permanen untuk semua perangkat di Vercel:</div>
+        Buka file ini di GitHub, ubah nilai variabel <code class="font-mono text-limebrand">GAS_WEB_APP_URL</code> pada bagian atas tag <code class="font-mono text-slate-300">&lt;script&gt;</code> dengan URL <code class="font-mono text-limebrand">/exec</code> Anda, lalu commit perubahan. Vercel akan otomatis melakukan re-deploy.
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================================================================
+       FULL-SCREEN IFRAME PEMBUNGKUS WEB APP GOOGLE APPS SCRIPT
+       ====================================================================== -->
+  <iframe
+    id="gasAppFrame"
+    title="Cahaya Mega — The Paint Specialist"
+    class="block w-full h-[100dvh] border-0 bg-canvas"
+    allow="clipboard-read; clipboard-write; camera; microphone"
+    allowfullscreen
+  ></iframe>
+
+  <script>
+    /**
+     * ========================================================================
+     * KONFIGURASI UTAMA FILE PEMBUNGKUS (GITHUB & VERCEL)
+     * ========================================================================
+     * Ganti teks di bawah ini dengan URL Aplikasi Web Google Apps Script Anda
+     * yang berakhiran "/exec" (dari proyek Google Sheets yang memasang penghubung.gs).
+     * Contoh:
+     * var GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxxxxxxx/exec';
+     */
+    var GAS_WEB_APP_URL = 'PASTE_URL_DEPLOY_WEB_APP_APPS_SCRIPT_ANDA_DI_SINI';
+
+    var LOCAL_URL_KEY = 'CM_VERCEL_WRAPPER_GAS_URL';
+
+    function isValidGasUrl(url) {
+      var u = String(url || '').trim();
+      return /^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_\-]+\/(exec|dev)(\?.*)?$/.test(u);
+    }
+
+    function hideSplash() {
+      var splash = document.getElementById('splashLoader');
+      if (!splash) return;
+      splash.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(function() {
+        splash.classList.add('hidden');
+      }, 520);
+    }
+
+    function mountGasIframe(targetUrl) {
+      var setupPanel = document.getElementById('setupPanel');
+      var splash = document.getElementById('splashLoader');
+      var frame = document.getElementById('gasAppFrame');
+
+      setupPanel.classList.add('hidden');
+      splash.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+
+      // Teruskan query string bila ada (opsional)
+      var finalUrl = targetUrl;
+      if (window.location.search && targetUrl.indexOf('?') === -1) {
+        finalUrl = targetUrl + window.location.search;
+      }
+
+      var loaded = false;
+      frame.onload = function() {
+        loaded = true;
+        hideSplash();
+      };
+
+      // Pengaman jika onload iframe tertunda di beberapa browser mobile
+      setTimeout(function() {
+        if (!loaded) hideSplash();
+      }, 6500);
+
+      frame.src = finalUrl;
+    }
+
+    function showSetupPanel() {
+      hideSplash();
+      document.getElementById('setupPanel').classList.remove('hidden');
+    }
+
+    function applyQuickUrl() {
+      var input = document.getElementById('quickGasUrl');
+      var errBox = document.getElementById('quickUrlError');
+      var val = String(input.value || '').trim();
+
+      errBox.classList.add('hidden');
+      if (!isValidGasUrl(val)) {
+        errBox.textContent = 'Format URL tidak valid. Pastikan URL diawali https://script.google.com/macros/s/... dan diakhiri /exec.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        localStorage.setItem(LOCAL_URL_KEY, val);
+      } catch (e) {}
+
+      mountGasIframe(val);
+    }
+
+    function resetSavedUrl() {
+      try {
+        localStorage.removeItem(LOCAL_URL_KEY);
+      } catch (e) {}
+      document.getElementById('quickGasUrl').value = '';
+      var errBox = document.getElementById('quickUrlError');
+      errBox.textContent = 'URL tersimpan di browser ini telah dihapus.';
+      errBox.classList.remove('hidden');
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      try {
+        if (isValidGasUrl(GAS_WEB_APP_URL)) {
+          mountGasIframe(GAS_WEB_APP_URL);
+          return;
+        }
+
+        var savedUrl = '';
+        try {
+          savedUrl = localStorage.getItem(LOCAL_URL_KEY) || '';
+        } catch (e) {}
+
+        if (isValidGasUrl(savedUrl)) {
+          mountGasIframe(savedUrl);
+        } else {
+          showSetupPanel();
+        }
+      } catch (err) {
+        showSetupPanel();
+      }
+    });
+  </script>
+</body>
+</html>
